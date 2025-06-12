@@ -1,0 +1,14 @@
+# FILE CON STRAVA
+.env
+
+# File temporanei di Python
+__pycache__/
+*.pyc
+
+# Cartelle di sistema/editor
+.vscode/
+.idea/
+
+# Dipendenze (in caso di uso di venv)
+venv/
+.env/
