@@ -1,0 +1,12 @@
+{
+  "name": "runasone-dev",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "concurrently \"npm:dev-frontend\" \"npm:dev-backend\"",
+    "dev-frontend": "cd frontend && npm run dev",
+    "dev-backend": "uvicorn app.main:app --reload"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}

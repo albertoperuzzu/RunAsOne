@@ -41,4 +41,4 @@ async def callback(request: Request):
         data = response.json()
         user_token["access_token"] = data["access_token"]
 
-    return {"message": "Autenticazione avvenuta con successo!"}
+    return RedirectResponse(url="http://localhost:5173/activities")

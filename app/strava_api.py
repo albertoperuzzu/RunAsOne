@@ -9,7 +9,7 @@ from fastapi.responses import StreamingResponse
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("/getActivities")
 async def get_activities():
     access_token = user_token.get("access_token")
     if not access_token:

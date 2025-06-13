@@ -12,3 +12,6 @@ __pycache__/
 # Dipendenze (in caso di uso di venv)
 venv/
 .env/
+
+# node
+node_modules/
