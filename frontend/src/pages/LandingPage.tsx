@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Button from "../components/Button";
 
 function LandingPage() {
   return (
@@ -8,12 +9,16 @@ function LandingPage() {
         alt="RunAsOne logo"
         className="w-40 h-40 mb-8"
       />
+      <div className="bg-red-500 text-white p-4">Test</div>
       <h1 className="text-3xl font-bold mb-6">Benvenuto su RunAsOne</h1>
-      <button 
-            onClick={() => { window.location.href = "http://localhost:8000/login"; }} 
-            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow">
+      <Button
+        variant="primary"
+        onClick={() => {
+          window.location.href = "http://localhost:8000/login";
+        }}
+      >
         Accedi con Strava
-      </button>
+      </Button>
     </div>
   );
 }

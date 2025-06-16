@@ -6,7 +6,7 @@ type Activity = {
   distance: number; // in metri
 };
 
-export default function AttivitaPage() {
+export default function AttivitiesPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +22,7 @@ export default function AttivitaPage() {
       .then((data) => {
         setActivities(data);
         setLoading(false);
+        console.log(data);
       })
       .catch((err) => {
         console.error(err);
@@ -43,6 +44,14 @@ export default function AttivitaPage() {
             <p className="text-sm text-gray-600">
               Distanza: {(a.distance / 1000).toFixed(2)} km
             </p>
+            <button 
+                    onClick={() => { 
+                        let url = "http://localhost:8000/activities/" + a.id + "/export_gpx";
+                        window.location.href = url; 
+                    }} 
+                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow">
+                Scarica GPX
+            </button>
           </li>
         ))}
       </ul>
