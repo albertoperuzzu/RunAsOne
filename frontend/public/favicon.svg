@@ -1,0 +1,13 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo con gradiente colorato -->
+  <rect width="64" height="64" rx="12" fill="url(#waveGradient)"/>
+  <defs>
+    <linearGradient id="waveGradient" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FC466B"/>
+      <stop offset="1" stop-color="#3F5EFB"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Elemento onda di movimento -->
+  <path d="M16 32C16 32 24 24 32 32C40 40 48 32 48 32" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+</svg>

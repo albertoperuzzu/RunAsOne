@@ -7,9 +7,6 @@
     "dev-backend": "uvicorn app.main:app --reload"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.21",
-    "concurrently": "^8.0.0",
-    "postcss": "^8.5.5",
-    "tailwindcss": "^4.1.10"
+    "concurrently": "^8.0.0"
   }
 }

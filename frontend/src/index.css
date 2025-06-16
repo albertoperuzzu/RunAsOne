@@ -1,3 +1,10 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-strava: #ff6347;
+  --font-heading: "Inter", sans-serif;
+  --breakpoint-3xl: 1920px;
+  --color-primary: #0A2342, 
+  --color-secondary: #74C0FC,
+  --color-neutral: #FFFFFF,
+}

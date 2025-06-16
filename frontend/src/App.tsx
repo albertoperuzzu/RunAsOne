@@ -4,7 +4,7 @@ import {
   Route,
 } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
-import ActivitiesPage from "./pages/ActivitiesPage"; // lo creeremo dopo
+import ActivitiesPage from "./pages/ActivitiesPage";
 
 function App() {
   return (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Button from "../components/Button";
 
 type Activity = {
   id: number;
@@ -44,14 +45,15 @@ export default function AttivitiesPage() {
             <p className="text-sm text-gray-600">
               Distanza: {(a.distance / 1000).toFixed(2)} km
             </p>
-            <button 
-                    onClick={() => { 
-                        let url = "http://localhost:8000/activities/" + a.id + "/export_gpx";
-                        window.location.href = url; 
-                    }} 
-                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow">
-                Scarica GPX
-            </button>
+            <Button
+              variant="strava"
+              onClick={() => {
+                let url = "http://localhost:8000/activities/" + a.id + "/export_gpx";
+                window.location.href = url;
+              }}
+            >
+              Scarica GPX
+            </Button>
           </li>
         ))}
       </ul>
