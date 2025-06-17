@@ -16,7 +16,7 @@ REDIRECT_URI = os.getenv("STRAVA_REDIRECT_URI")
 user_token = {}  # TEMPORARY IN-MEMORY TOKEN
 
 
-@router.get("/login")
+@router.get("/strava_login")
 def login():
     params = {
         "client_id": CLIENT_ID,
@@ -38,7 +38,8 @@ async def callback(request: Request):
             "code": code,
             "grant_type": "authorization_code"
         })
-        data = response.json()
-        user_token["access_token"] = data["access_token"]
 
-    return RedirectResponse(url="http://localhost:5173/activities")
+        data = response.json()
+        user_token["strava_access_token"] = data["access_token"]
+
+    return RedirectResponse(url="http://localhost:5173/strava-redirect")

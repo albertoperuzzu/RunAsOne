@@ -1,6 +1,9 @@
 # FILE CON STRAVA
 .env
 
+# Database
+*.db
+
 # File temporanei di Python
 __pycache__/
 *.pyc

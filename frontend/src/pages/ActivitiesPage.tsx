@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ActivityCard from "../components/ActivityCard";
+import Navbar from "../components/Navbar";
 
 type Activity = {
   id: number;
@@ -36,6 +37,7 @@ export default function AttivitiesPage() {
 
   return (
     <div className="bg-neutral p-4">
+      <Navbar />
       <h1 className="text-2xl font-bold mb-4">Le tue attività</h1>
       <ul className="space-y-2">
         {activities.map((activity) => (

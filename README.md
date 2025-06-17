@@ -10,3 +10,7 @@ Backend FastAPI per condividere attività Strava all'interno di un gruppo.
 
 ```bash
 pip install -r requirements.txt
+
+// TODO
+Gestione HttpOnly cookie invece del solo localStorage
+Gestione Refresh Token interno e di Strava

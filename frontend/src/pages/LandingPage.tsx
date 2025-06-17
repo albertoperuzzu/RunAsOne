@@ -1,7 +1,8 @@
-//import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 
 function LandingPage() {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-white text-gray-800">
       <img
@@ -9,13 +10,11 @@ function LandingPage() {
         alt="RunAsOne logo"
         className="w-40 h-40 mb-8"
       />
-      <Button
-        variant="strava"
-        onClick={() => {
-          window.location.href = "http://localhost:8000/login";
-        }}
-      >
-        Accedi con Strava
+      <Button variant="primary" onClick={() => navigate("/login")}>
+        Login
+      </Button>
+      <Button variant="primary" onClick={() => navigate("/register")}>
+        Registrati
       </Button>
     </div>
   );

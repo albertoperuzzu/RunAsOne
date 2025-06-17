@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from fastapi import HTTPException
 import httpx
 from app.auth import user_token
 
@@ -11,7 +12,7 @@ router = APIRouter()
 
 @router.get("/getActivities")
 async def get_activities():
-    access_token = user_token.get("access_token")
+    access_token = user_token.get("strava_access_token")
     if not access_token:
         raise HTTPException(status_code=401, detail="User not authenticated")
 
@@ -35,7 +36,7 @@ async def get_activities():
 
 @router.get("/{activity_id}/export_gpx")
 async def export_gpx(activity_id: int):
-    access_token = user_token.get("access_token")
+    access_token = user_token.get("strava_access_token")
     if not access_token:
         raise HTTPException(status_code=401, detail="User not authenticated")
 
