@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import Button from "../components/Button";
+import ActivityCard from "../components/ActivityCard";
 
 type Activity = {
   id: number;
   name: string;
-  distance: number; // in metri
+  distance: number;
 };
 
 export default function AttivitiesPage() {
@@ -23,7 +23,6 @@ export default function AttivitiesPage() {
       .then((data) => {
         setActivities(data);
         setLoading(false);
-        console.log(data);
       })
       .catch((err) => {
         console.error(err);
@@ -36,24 +35,12 @@ export default function AttivitiesPage() {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="p-4">
+    <div className="bg-neutral p-4">
       <h1 className="text-2xl font-bold mb-4">Le tue attività</h1>
       <ul className="space-y-2">
-        {activities.map((a) => (
-          <li key={a.id} className="bg-white shadow rounded p-4">
-            <p className="text-lg font-semibold">{a.name}</p>
-            <p className="text-sm text-gray-600">
-              Distanza: {(a.distance / 1000).toFixed(2)} km
-            </p>
-            <Button
-              variant="strava"
-              onClick={() => {
-                let url = "http://localhost:8000/activities/" + a.id + "/export_gpx";
-                window.location.href = url;
-              }}
-            >
-              Scarica GPX
-            </Button>
+        {activities.map((activity) => (
+          <li key={activity.id}>
+            <ActivityCard activity={activity} />
           </li>
         ))}
       </ul>

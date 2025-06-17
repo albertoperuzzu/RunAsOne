@@ -12,7 +12,7 @@ export default function Button({
   const base = "font-semibold px-4 py-2 rounded-md transition";
   const variants = {
     strava: "bg-strava text-white hover:bg-strava/90",
-    primary: "bg-primary text-white hover:bg-primary/90",
+    primary: "bg-magenta text-white hover:bg-magenta/90",
     secondary: "bg-white text-primary hover:bg-secondary",
   };
 

@@ -1,10 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-strava: #ff6347;
   --font-heading: "Inter", sans-serif;
   --breakpoint-3xl: 1920px;
-  --color-primary: #0A2342, 
-  --color-secondary: #74C0FC,
-  --color-neutral: #FFFFFF,
+  --color-strava: #fc4c02;
+  --color-primary: #0a2342;
+  --color-secondary: #74c0fc;
+  --color-neutral: #ffffff;
+  --color-magenta: #fc466b;
+  --color-viola: #3f5efb;
+  --color-blu: #00bfff;
+  --color-giallo: #ffd700;
+  --color-arancio: #ffa500;
 }
