@@ -7,13 +7,12 @@ function StravaRedirect() {
   useEffect(() => {
     const checkStravaAuth = async () => {
       try {
-        // Optional: puoi fare una chiamata per verificare il token
-        // oppure semplicemente attendere un attimo
         await new Promise(resolve => setTimeout(resolve, 1000));
+        localStorage.setItem("strava_connected", "true");
         navigate("/activities", { replace: true });
       } catch (err) {
         console.error("Errore nel redirect da Strava:", err);
-        navigate("/", { replace: true }); // torna alla landing
+        navigate("/", { replace: true });
       }
     };
 

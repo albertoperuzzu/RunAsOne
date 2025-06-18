@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
 
   const handleRegister = async () => {
     const res = await fetch("http://localhost:8000/register", {
@@ -20,24 +23,35 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Registrati</h2>
-      <input
-        className="border p-2 mb-2 w-full"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        className="border p-2 mb-2 w-full"
-        placeholder="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button className="bg-primary text-white p-2 rounded" onClick={handleRegister}>
-        Registrati
-      </button>
+    <div className="max-w-md mx-auto pt-6">
+      <div className="max-w-md bg-white/70 mx-auto p-6 shadow-md rounded-lg">
+        <h2 className="text-2xl font-bold mb-4">Registrati</h2>
+        <input
+          className="border bg-white border-gray-300 p-2 rounded w-full mb-3"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          className="border bg-white border-gray-300 p-2 rounded w-full mb-3"
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button className="w-full bg-primary text-white p-2 rounded hover:bg-primary/90 transition" onClick={handleRegister}>
+          Registrati
+        </button>
+        <div className="mt-10 text-center">
+          <p className="text-sm text-gray-700 mb-2">Hai già un Account?</p>
+          <button
+            onClick={() => navigate("/login")}
+            className="w-40 bg-primary text-white p-2 rounded hover:bg-primary/90 transition"
+          >
+            Login
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

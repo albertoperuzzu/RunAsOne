@@ -36,35 +36,46 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">Login</h2>
+    <div className="max-w-md mx-auto pt-6">
+      <div className="max-w-md bg-white/70 mx-auto p-6 shadow-md rounded-lg">
+        <h2 className="text-2xl font-bold mb-4">Login</h2>
 
-      <input
-        className="border border-gray-300 p-2 rounded w-full mb-3"
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+        <input
+          className="border bg-white border-gray-300 p-2 rounded w-full mb-3"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-      <input
-        className="border border-gray-300 p-2 rounded w-full mb-3"
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+        <input
+          className="border bg-white border-gray-300 p-2 rounded w-full mb-3"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-      {errorMessage && (
-        <p className="text-red-600 text-sm mb-3">{errorMessage}</p>
-      )}
+        {errorMessage && (
+          <p className="text-red-600 text-sm mb-3">{errorMessage}</p>
+        )}
 
-      <button
-        onClick={handleLogin}
-        className="w-full bg-primary text-white p-2 rounded hover:bg-primary/90 transition"
-      >
-        Accedi
-      </button>
+        <button
+          onClick={handleLogin}
+          className="w-full bg-primary text-white p-2 rounded hover:bg-primary/90 transition"
+        >
+          Accedi
+        </button>
+        <div className="mt-10 text-center">
+          <p className="text-sm text-gray-700 mb-2">Non hai ancora un account?</p>
+          <button
+            onClick={() => navigate("/register")}
+            className="w-40 bg-primary text-white p-2 rounded hover:bg-primary/90 transition"
+          >
+            Registrati
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

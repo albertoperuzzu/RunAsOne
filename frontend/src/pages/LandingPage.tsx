@@ -4,7 +4,7 @@ import Button from "../components/Button";
 function LandingPage() {
   const navigate = useNavigate();
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-white text-gray-800">
+    <div className="flex flex-col items-center justify-center h-screen text-gray-800">
       <img
         src="/runasone.png"
         alt="RunAsOne logo"
