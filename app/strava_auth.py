@@ -64,8 +64,10 @@ async def callback(
 
         data = response.json()
         strava_id = data["athlete"]["id"]
+        access_token = data["access_token"]
 
     user.strava_id = strava_id
+    user.strava_access_token = access_token
     db.commit()
 
     return RedirectResponse(url="http://localhost:5173/strava-redirect")

@@ -17,7 +17,7 @@ async def get_activities(
     db: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    print("✅ Entrato in /getActivities")
+    print("Entrato in /getActivities")
     print(f"Current user: {current_user}")
     access_token = current_user.strava_access_token
     user_id = current_user.id

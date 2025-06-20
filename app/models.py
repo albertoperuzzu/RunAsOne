@@ -19,5 +19,6 @@ class User(SQLModel, table=True):
     email: str = Field(index=True, nullable=False, unique=True)
     hashed_password: str
     strava_id: Optional[int] = Field(index=True, unique=True) 
+    strava_access_token: Optional[str] = Field(nullable=True)
 
     activities: List[Activity] = Relationship(back_populates="user")
