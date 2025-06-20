@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { login } = useAuth();
 
   const navigate = useNavigate();
 
@@ -12,21 +14,20 @@ export default function LoginPage() {
     try {
       const res = await fetch("http://localhost:8000/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
           username: email,
-          password: password,
-        }),
+          password: password
+        })
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        localStorage.setItem("token", data.access_token);
+        login(data.access_token);
         navigate("/home");
       } else {
+        console.error("Errore di login:", data);
         setErrorMessage(data.detail || "Errore nel login.");
       }
     } catch (error) {

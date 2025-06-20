@@ -1,14 +1,15 @@
-from fastapi import FastAPI
-from fastapi import Depends
-from fastapi import HTTPException
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import select
 from app.models import User
 from app.utils import hash_password, verify_password, create_access_token
 from app.database import engine, create_db_and_tables, get_session
 from fastapi.middleware.cors import CORSMiddleware
-from app.auth import router as auth_router
+from app.strava_auth import router as auth_router
 from app.strava_api import router as strava_router
+from sqlalchemy.orm import Session
+from jose import jwt
+from app.auth_helpers import SECRET_KEY, ALGORITHM
 
 app = FastAPI()
 create_db_and_tables()
@@ -30,18 +31,12 @@ def register(user_input: User, session=Depends(get_session)):
     return {"id": user_input.id, "email": user_input.email}
 
 @app.post("/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends(), session=Depends(get_session)):
-    user = session.exec(
-        select(User).where(User.email == form_data.username)
-    ).first()
+def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_session)):
+    user = db.exec(select(User).where(User.email == form.username)).first()
+    if not user or not verify_password(form.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Credenziali errate")
 
-    if not user:
-        raise HTTPException(status_code=400, detail="Email non trovata.")
-
-    if not verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(status_code=400, detail="Password errata.")
-
-    token = create_access_token({"sub": user.email})
+    token = jwt.encode({"user_id": user.id}, SECRET_KEY, algorithm=ALGORITHM)
     return {"access_token": token, "token_type": "bearer"}
 
 app.add_middleware(

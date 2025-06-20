@@ -26,7 +26,8 @@ function HomePage() {
           <Button
             variant="strava"
             onClick={() => {
-              window.location.href = "http://localhost:8000/strava_login";
+              const token = localStorage.getItem("token");
+              window.location.href = `http://localhost:8000/strava_login?token=${token}`;
             }}
           >
             Importa da Strava
@@ -43,7 +44,7 @@ function HomePage() {
               variant="primary"
               onClick={() => navigate("/home")}
             >
-              Il mio Team
+              Team
             </Button>
           </div>
         )}

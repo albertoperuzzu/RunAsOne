@@ -12,10 +12,14 @@ export default function AttivitiesPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     fetch("http://localhost:8000/activities/getActivities", {
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
     })
       .then(async (res) => {
         if (!res.ok) throw new Error("Errore nel caricamento");

@@ -4,7 +4,7 @@
   "scripts": {
     "start": "concurrently \"npm:dev-frontend\" \"npm:dev-backend\"",
     "dev-frontend": "cd frontend && npm run dev",
-    "dev-backend": "uvicorn app.main:app --reload"
+    "dev-backend": "uvicorn app.main:app --reload --log-level debug"
   },
   "devDependencies": {
     "@types/jwt-decode": "^2.2.1",

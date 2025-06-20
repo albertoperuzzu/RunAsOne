@@ -1,42 +1,52 @@
-from fastapi import APIRouter
-from fastapi import HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 import httpx
-from app.auth import user_token
-
+from app.database import get_session
+from app.models import User
+from app.utils import save_activities
 import gpxpy
 import gpxpy.gpx
 from fastapi.responses import StreamingResponse
+from sqlmodel import Session
+from app.auth_helpers import get_current_user
 
 router = APIRouter()
 
 
 @router.get("/getActivities")
-async def get_activities():
-    access_token = user_token.get("strava_access_token")
+async def get_activities(
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    print("✅ Entrato in /getActivities")
+    print(f"Current user: {current_user}")
+    access_token = current_user.strava_access_token
+    user_id = current_user.id
+
     if not access_token:
-        raise HTTPException(status_code=401, detail="User not authenticated")
+        raise HTTPException(status_code=401, detail="User not connected to Strava")
 
-    async with httpx.AsyncClient() as client:
-        res = await client.get(
-            "https://www.strava.com/api/v3/athlete/activities",
-            headers={"Authorization": f"Bearer {access_token}"}
-        )
+    try:
+        async with httpx.AsyncClient() as client:
+            res = await client.get(
+                "https://www.strava.com/api/v3/athlete/activities",
+                headers={"Authorization": f"Bearer {access_token}"}
+            )
 
-        activities = res.json()
+            activities = res.json()
+            print(f"Fetched {len(activities)} activities from Strava")
+            filtered = [a for a in activities if a.get("type") in ["Run", "Hike"]]
 
-        # 🔍 Filtra solo Run e Hike
-        filtered = [
-            a for a in activities
-            if a.get("type") in ["Run", "Hike"]
-        ]
-
-        return filtered
+            save_activities(filtered, user_id=user_id, db=db)
+            return filtered
+    except Exception as e:
+        print(f"Errore durante la chiamata a Strava: {e}")
+        raise HTTPException(status_code=500, detail="Errore interno durante il recupero delle attività")
 
 
 
 @router.get("/{activity_id}/export_gpx")
-async def export_gpx(activity_id: int):
-    access_token = user_token.get("strava_access_token")
+async def export_gpx(activity_id: int, current_user: User = Depends(get_current_user)):
+    access_token = current_user.strava_access_token
     if not access_token:
         raise HTTPException(status_code=401, detail="User not authenticated")
 
