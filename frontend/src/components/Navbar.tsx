@@ -62,6 +62,15 @@ export default function Navbar() {
             </Link>
           </li>
           <li>
+            <Link
+              to="/teams"
+              onClick={() => setIsOpen(false)}
+              className="block hover:underline"
+            >
+              Teams
+            </Link>
+          </li>
+          <li>
             <button
               onClick={handleLogout}
               className="w-full text-right hover:underline"

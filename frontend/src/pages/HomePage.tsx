@@ -6,11 +6,29 @@ import Navbar from "../components/Navbar";
 function HomePage() {
 
   const [isStravaConnected, setIsStravaConnected] = useState(false);
+  const [pendingInvites, setPendingInvites] = useState([]);
+  const [loadingInvites, setLoadingInvites] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const connected = localStorage.getItem("strava_connected") === "true";
     setIsStravaConnected(connected);
+
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetch("http://localhost:8000/db/check_invites", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setPendingInvites(data);
+          setLoadingInvites(false);
+        })
+        .catch(() => setLoadingInvites(false));
+    }
+
   }, []);
 
   return (
@@ -22,6 +40,23 @@ function HomePage() {
           alt="RunAsOne logo"
           className="w-40 h-40 mb-8"
         />
+
+        {!loadingInvites && pendingInvites.length > 0 && (
+          <div className="mb-4 text-center">
+            <p className="text-md font-medium text-red-600">
+              Hai {pendingInvites.length} invito
+              {pendingInvites.length > 1 ? "i" : ""} pendente
+              {pendingInvites.length > 1 ? "i" : ""}
+            </p>
+            <Button
+              variant="primary"
+              onClick={() => navigate("/invites")}
+            >
+              Visualizza Inviti
+            </Button>
+          </div>
+        )}
+
         {!isStravaConnected ? (
           <Button
             variant="strava"
@@ -30,7 +65,7 @@ function HomePage() {
               window.location.href = `http://localhost:8000/strava_login?token=${token}`;
             }}
           >
-            Importa da Strava
+            Connetti a Strava
           </Button>
         ) : (
           <div className="flex flex-col items-center space-y-4">
@@ -42,7 +77,7 @@ function HomePage() {
             </Button>
             <Button
               variant="primary"
-              onClick={() => navigate("/home")}
+              onClick={() => navigate("/teams")}
             >
               Team
             </Button>

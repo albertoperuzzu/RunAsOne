@@ -28,23 +28,3 @@ def verify_token(token: str):
         return payload
     except JWTError:
         raise HTTPException(status_code=401, detail="Token non valido")
-
-def save_activities(filtered: list, user_id: int, db: Session):
-    for act in filtered:
-        strava_id = act["id"]
-        existing = db.exec(
-            select(Activity).where(
-                Activity.strava_id == strava_id,
-                Activity.user_id == user_id
-            )
-        ).first()
-
-        if not existing:
-            new_activity = Activity(
-                strava_id=strava_id,
-                name=act["name"],
-                distance=act["distance"],
-                user_id=user_id
-            )
-            db.add(new_activity)
-    db.commit()

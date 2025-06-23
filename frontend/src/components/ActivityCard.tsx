@@ -20,7 +20,7 @@ export default function ActivityCard({ activity }: Props) {
       <Button
         variant="primary"
         onClick={() => {
-          const url = `http://localhost:8000/activities/${activity.id}/export_gpx`;
+          const url = `http://localhost:8000/strava_api/${activity.id}/export_gpx`;
           window.location.href = url;
         }}
       >

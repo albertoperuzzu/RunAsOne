@@ -1,18 +1,24 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
 from sqlmodel import select
 from app.models import User
-from app.utils import hash_password, verify_password, create_access_token
+from app.utils import hash_password, verify_password
 from app.database import engine, create_db_and_tables, get_session
 from fastapi.middleware.cors import CORSMiddleware
 from app.strava_auth import router as auth_router
 from app.strava_api import router as strava_router
+from app.db_search import router as db_router
+from app.db_search import UPLOAD_DIR
 from sqlalchemy.orm import Session
 from jose import jwt
+import os
 from app.auth_helpers import SECRET_KEY, ALGORITHM
 
 app = FastAPI()
 create_db_and_tables()
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 @app.post("/register")
 def register(user_input: User, session=Depends(get_session)):
@@ -48,4 +54,5 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="")
-app.include_router(strava_router, prefix="/activities")
+app.include_router(strava_router, prefix="/strava_api")
+app.include_router(db_router, prefix="/db")

@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 import httpx
 from app.database import get_session
 from app.models import User
-from app.utils import save_activities
+from app.db_utils import save_activities
 import gpxpy
 import gpxpy.gpx
 from fastapi.responses import StreamingResponse
@@ -12,8 +12,8 @@ from app.auth_helpers import get_current_user
 router = APIRouter()
 
 
-@router.get("/getActivities")
-async def get_activities(
+@router.get("/syncActivities")
+async def sync_activities(
     db: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
@@ -34,9 +34,9 @@ async def get_activities(
             filtered = [a for a in activities if a.get("type") in ["Run", "Hike"]]
 
             save_activities(filtered, user_id=user_id, db=db)
-            return filtered
+            return {"message": "Attività sincronizzate con Strava."}
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Errore interno durante il recupero delle attività")
+        raise HTTPException(status_code=500, detail="Errore durante la sincronizzazione con Strava")
 
 
 

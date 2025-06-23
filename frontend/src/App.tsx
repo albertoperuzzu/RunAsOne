@@ -10,6 +10,10 @@ import RegisterPage from "./pages/RegisterPage";
 import HomePage from "./pages/HomePage.tsx";
 import StravaRedirect from "./pages/StravaRedirect.tsx";
 import PrivateRoute from "./components/PrivateRoute";
+import TeamsPage from "./pages/TeamsPage.tsx";
+import CreateTeamPage from "./pages/CreateTeamPage.tsx";
+import TeamSelected from "./pages/TeamSelected.tsx";
+import InvitesPage from "./pages/InvitesPage.tsx";
 
 function App() {
   return (
@@ -27,6 +31,19 @@ function App() {
             <ActivitiesPage /> 
           </PrivateRoute> }
         />
+        <Route path="/teams" element={ <PrivateRoute> 
+            <TeamsPage /> 
+          </PrivateRoute> }
+        />
+        <Route path="/createTeam" element={ <PrivateRoute> 
+            <CreateTeamPage /> 
+          </PrivateRoute> }
+        />
+        <Route path="/invites" element={ <PrivateRoute> 
+            <InvitesPage /> 
+          </PrivateRoute> }
+        />
+        <Route path="/teams/:id" element={<TeamSelected />} />
       </Routes>
     </Router>
   );

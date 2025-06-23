@@ -3,6 +3,8 @@
 
 # Database
 *.db
+static/
+uploads/
 
 # File temporanei di Python
 __pycache__/
