@@ -17,8 +17,6 @@ async def get_activities(
     db: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    print("Entrato in /getActivities")
-    print(f"Current user: {current_user}")
     access_token = current_user.strava_access_token
     user_id = current_user.id
 
@@ -33,13 +31,11 @@ async def get_activities(
             )
 
             activities = res.json()
-            print(f"Fetched {len(activities)} activities from Strava")
             filtered = [a for a in activities if a.get("type") in ["Run", "Hike"]]
 
             save_activities(filtered, user_id=user_id, db=db)
             return filtered
     except Exception as e:
-        print(f"Errore durante la chiamata a Strava: {e}")
         raise HTTPException(status_code=500, detail="Errore interno durante il recupero delle attività")
 
 
@@ -51,7 +47,6 @@ async def export_gpx(activity_id: int, current_user: User = Depends(get_current_
         raise HTTPException(status_code=401, detail="User not authenticated")
 
     async with httpx.AsyncClient() as client:
-        # Recupera i punti GPS dell’attività
         response = await client.get(
             f"https://www.strava.com/api/v3/activities/{activity_id}/streams",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -67,7 +62,6 @@ async def export_gpx(activity_id: int, current_user: User = Depends(get_current_
         time_stream = data.get("time", {}).get("data", [])
         alt_stream = data.get("altitude", {}).get("data", [])
 
-        # Crea GPX
         gpx = gpxpy.gpx.GPX()
         gpx_track = gpxpy.gpx.GPXTrack()
         gpx.tracks.append(gpx_track)
