@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
-//import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 type Invite = {
   id: number;
@@ -13,7 +13,7 @@ type Invite = {
 export default function InvitesPage() {
   const [invites, setInvites] = useState<Invite[]>([]);
   const [loading, setLoading] = useState(true);
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -41,6 +41,7 @@ export default function InvitesPage() {
 
     if (res.ok) {
       setInvites((prev) => prev.filter((i) => i.id !== inviteId));
+      navigate("/home"); 
     } else {
       alert("Errore nell'accettare l'invito");
     }
@@ -58,6 +59,7 @@ export default function InvitesPage() {
 
     if (res.ok) {
       setInvites((prev) => prev.filter((i) => i.id !== inviteId));
+      navigate("/home"); 
     } else {
       alert("Errore nel rifiutare l'invito");
     }

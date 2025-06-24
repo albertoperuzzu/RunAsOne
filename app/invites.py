@@ -106,3 +106,33 @@ def reject_invite(
     db.delete(invite)
     db.commit()
     return {"message": "Invito rifiutato"}
+
+
+@router.delete("/{team_id}/remove_member/{user_id}")
+def remove_member_from_team(
+    team_id: int,
+    user_id: int,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    admin_link = db.exec(
+        select(UserTeamLink).where(
+            UserTeamLink.user_id == current_user.id,
+            UserTeamLink.team_id == team_id,
+            UserTeamLink.role == "admin"
+        )
+    ).first()
+    if not admin_link:
+        raise HTTPException(status_code=403, detail="Solo l'amministratore può rimuovere membri")
+    user_link = db.exec(
+        select(UserTeamLink).where(
+            UserTeamLink.user_id == user_id,
+            UserTeamLink.team_id == team_id
+        )
+    ).first()
+    if not user_link:
+        raise HTTPException(status_code=404, detail="Utente non trovato nel team")
+    db.delete(user_link)
+    db.commit()
+
+    return {"message": "Membro rimosso dal team"}

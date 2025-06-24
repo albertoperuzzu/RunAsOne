@@ -44,11 +44,42 @@ def get_my_teams(
 
 
 @router.get("/teams/{team_id}")
-def get_team(team_id: int, db: Session = Depends(get_session)):
+def get_team(
+    team_id: int,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
     team = db.get(Team, team_id)
     if not team:
         raise HTTPException(status_code=404, detail="Team non trovato")
-    return team
+    link = db.exec(
+        select(UserTeamLink).where(
+            UserTeamLink.team_id == team_id,
+            UserTeamLink.user_id == current_user.id
+        )
+    ).first()
+    if not link:
+        raise HTTPException(status_code=403, detail="Non sei membro di questo team")
+    member_links = db.exec(
+        select(UserTeamLink).where(UserTeamLink.team_id == team_id)
+    ).all()
+    members = []
+    for l in member_links:
+        user = db.get(User, l.user_id)
+        if user:
+            members.append({
+                "id": user.id,
+                "email": user.email,
+                "role": l.role
+            })
+
+    return {
+        "id": team.id,
+        "name": team.name,
+        "image_url": team.image_url,
+        "is_admin": link.role == "admin",
+        "members": members
+    }
 
 
 @router.post("/create_team")
