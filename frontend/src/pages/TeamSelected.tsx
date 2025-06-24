@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import Navbar from "../components/Navbar";
 
 type Team = {
   id: number;
@@ -29,7 +30,7 @@ export default function TeamSelected() {
   const handleInvite = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:8000/db/teams/${id}/invite`, {
+      const res = await fetch(`http://localhost:8000/handle_invites/teams/${id}/invite`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -54,6 +55,7 @@ export default function TeamSelected() {
 
   return (
     <div className="p-6 max-w-xl mx-auto">
+      <Navbar/>
       <img
         src={`http://localhost:8000/uploads/${team.image_url}`}
         alt={team.name}

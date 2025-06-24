@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.strava_auth import router as auth_router
 from app.strava_api import router as strava_router
 from app.db_search import router as db_router
+from app.invites import router as invites_router
 from app.db_search import UPLOAD_DIR
 from sqlalchemy.orm import Session
 from jose import jwt
@@ -56,3 +57,4 @@ app.add_middleware(
 app.include_router(auth_router, prefix="")
 app.include_router(strava_router, prefix="/strava_api")
 app.include_router(db_router, prefix="/db")
+app.include_router(invites_router, prefix="/handle_invites")

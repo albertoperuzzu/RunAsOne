@@ -16,7 +16,7 @@ function HomePage() {
 
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("http://localhost:8000/db/check_invites", {
+      fetch("http://localhost:8000/handle_invites/check_invites", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -40,33 +40,24 @@ function HomePage() {
           alt="RunAsOne logo"
           className="w-40 h-40 mb-8"
         />
-
-        {!loadingInvites && pendingInvites.length > 0 && (
-          <div className="mb-4 text-center">
-            <p className="text-md font-medium text-red-600">
-              Hai {pendingInvites.length} invito
-              {pendingInvites.length > 1 ? "i" : ""} pendente
-              {pendingInvites.length > 1 ? "i" : ""}
-            </p>
+        {!isStravaConnected ? (
+          <div className="flex flex-col items-center space-y-4">
+            <Button
+              variant="strava"
+              onClick={() => {
+                const token = localStorage.getItem("token");
+                window.location.href = `http://localhost:8000/strava_login?token=${token}`;
+              }}
+            >
+              Connetti a Strava
+            </Button>
             <Button
               variant="primary"
-              onClick={() => navigate("/invites")}
+              onClick={() => navigate("/teams")}
             >
-              Visualizza Inviti
+              Team
             </Button>
           </div>
-        )}
-
-        {!isStravaConnected ? (
-          <Button
-            variant="strava"
-            onClick={() => {
-              const token = localStorage.getItem("token");
-              window.location.href = `http://localhost:8000/strava_login?token=${token}`;
-            }}
-          >
-            Connetti a Strava
-          </Button>
         ) : (
           <div className="flex flex-col items-center space-y-4">
             <Button
@@ -80,6 +71,21 @@ function HomePage() {
               onClick={() => navigate("/teams")}
             >
               Team
+            </Button>
+          </div>
+        )}
+        {!loadingInvites && pendingInvites.length > 0 && (
+          <div className="mb-4 text-center">
+            <p className="text-md font-medium text-red-600">
+              Hai {pendingInvites.length} invito
+              {pendingInvites.length > 1 ? "i" : ""} ad un team!
+              {pendingInvites.length > 1 ? "i" : ""}
+            </p>
+            <Button
+              variant="primary"
+              onClick={() => navigate("/invites")}
+            >
+              Visualizza Inviti
             </Button>
           </div>
         )}
