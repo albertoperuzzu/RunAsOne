@@ -26,25 +26,21 @@ def register(user_input: User, session=Depends(get_session)):
     existing_user = session.exec(
         select(User).where(User.email == user_input.email)
     ).first()
-
     if existing_user:
         raise HTTPException(status_code=400, detail="Email già registrata.")
-
     user_input.hashed_password = hash_password(user_input.hashed_password)
     session.add(user_input)
     session.commit()
     session.refresh(user_input)
-
-    return {"id": user_input.id, "email": user_input.email}
+    return {"id": user_input.id, "email": user_input.email, "nickname": user_input.name}
 
 @app.post("/login")
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_session)):
     user = db.exec(select(User).where(User.email == form.username)).first()
     if not user or not verify_password(form.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Credenziali errate")
-
     token = jwt.encode({"user_id": user.id}, SECRET_KEY, algorithm=ALGORITHM)
-    return {"access_token": token, "token_type": "bearer"}
+    return {"access_token": token, "token_type": "bearer", "nickname": user.name, "profile_img_url" : user.profile_img_url}
 
 app.add_middleware(
     CORSMiddleware,

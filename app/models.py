@@ -27,10 +27,12 @@ class Team(SQLModel, table=True):
 
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
     email: str = Field(index=True, nullable=False, unique=True)
     hashed_password: str
     strava_id: Optional[int] = Field(index=True, unique=True) 
     strava_access_token: Optional[str] = Field(nullable=True)
+    profile_img_url: Optional[str] = Field(nullable=False, default="/default_user_img.jpg")
     activities: List[Activity] = Relationship(back_populates="user")
     teams: List["Team"] = Relationship(back_populates="members", link_model=UserTeamLink)
 

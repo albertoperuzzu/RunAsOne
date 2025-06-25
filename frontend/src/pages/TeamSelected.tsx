@@ -4,7 +4,8 @@ import Navbar from "../components/Navbar";
 
 type Member = {
   id: number;
-  email: string;
+  name: string;
+  profile_img_url: string;
   role: string;
 };
 
@@ -93,8 +94,20 @@ export default function TeamSelected() {
         <h2 className="text-xl font-semibold mb-2 text-center">Membri del team</h2>
         <ul className="divide-y divide-gray-200">
           {team.members.map((member) => (
-            <li key={member.id} className="py-2 flex justify-between items-center">
-              <span>👤 {member.email}</span>
+            <li key={member.id} className="py-2 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <img
+                  src={
+                    member.profile_img_url.startsWith("/uploads/") ? `http://localhost:8000${member.profile_img_url}` : member.profile_img_url
+                  }
+                  alt={member.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                <div>
+                  <p className="font-medium">{member.name}</p>
+                  <p className="text-xs text-gray-500">{member.role}</p>
+                </div>
+              </div>
               {team.is_admin && member.role !== "admin" && (
                 <button
                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
@@ -103,7 +116,6 @@ export default function TeamSelected() {
                   Rimuovi
                 </button>
               )}
-              <span className="text-sm text-gray-600">{member.role}</span>
             </li>
           ))}
         </ul>

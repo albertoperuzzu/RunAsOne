@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import Navbar from "../components/Navbar";
+import { useUser } from "../context/UserContext";
 
 function HomePage() {
 
@@ -9,6 +10,7 @@ function HomePage() {
   const [pendingInvites, setPendingInvites] = useState([]);
   const [loadingInvites, setLoadingInvites] = useState(true);
   const navigate = useNavigate();
+  const { nickname } = getUserInfo();
 
   useEffect(() => {
     const connected = localStorage.getItem("strava_connected") === "true";
@@ -31,12 +33,22 @@ function HomePage() {
 
   }, []);
 
+  function getUserInfo() {
+    const { nickname, profile_img_url } = useUser();
+    return {
+      nickname,
+      profile_img_url,
+    };
+  }
+
   return (
     <div className="min-h-screen text-gray-800">
       <Navbar />
       <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)]">
+        <h1 className="text-2xl mb-8 font-bold">Ciao { nickname }!</h1>
         <img
           src="/runasone.png"
+          //src={ profile_img_url || "" }
           alt="RunAsOne logo"
           className="w-40 h-40 mb-8"
         />

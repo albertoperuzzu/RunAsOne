@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
+  const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ export default function RegisterPage() {
     const res = await fetch("http://localhost:8000/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, hashed_password: password }),
+      body: JSON.stringify({ email, hashed_password: password , name: nickname }),
     });
 
     if (res.ok) {
@@ -31,6 +32,12 @@ export default function RegisterPage() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          className="border bg-white border-gray-300 p-2 rounded w-full mb-3"
+          placeholder="Nickname"
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
         />
         <input
           className="border bg-white border-gray-300 p-2 rounded w-full mb-3"

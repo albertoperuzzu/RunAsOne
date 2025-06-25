@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useUser } from "../context/UserContext";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { login } = useAuth();
+  const { setUserData } = useUser();
 
   const navigate = useNavigate();
 
@@ -25,6 +27,7 @@ export default function LoginPage() {
 
       if (res.ok) {
         login(data.access_token);
+        setUserData(data.nickname, data.profile_img_url);
         navigate("/home");
       } else {
         console.error("Errore di login:", data);
