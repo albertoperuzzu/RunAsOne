@@ -70,12 +70,14 @@ def get_team(
             profile_img = user.profile_img_url or "/default_user_img.jpg"
             if not profile_img.startswith("/uploads/") and not profile_img.startswith("/"):
                 profile_img = f"/uploads/{profile_img}"
+
             members.append({
                 "id": user.id,
                 "email": user.email,
                 "name": user.name,
                 "profile_img_url": profile_img,
-                "role": l.role
+                "role": l.role,
+                "activities": user.activities
             })
 
     return {

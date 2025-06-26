@@ -1,13 +1,24 @@
 from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
+from sqlalchemy import Column, JSON
 from typing import Optional, List
+from datetime import datetime
 
 
 class Activity(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     strava_id: int = Field(index=True, nullable=False)
     name: str
-    distance: float
+    distance: Optional[float] = Field(default=None)
+    elevation : Optional[float] = Field(default=None)
     user_id: int = Field(foreign_key="user.id", nullable=False)
+    activity_type: str = Field(default=None, alias="type")
+    date: datetime
+    start_act: Optional[List[float]] = Field(sa_column=Column(JSON), default=None)
+    end_act: Optional[List[float]] = Field(sa_column=Column(JSON), default=None)
+    summary_polyline: Optional[str] = Field(default=None)
+    avg_speed : Optional[float] = Field(default=None)
+    max_speed : Optional[float] = Field(default=None)
+    elev_high : Optional[float] = Field(default=None)
     __table_args__ = (UniqueConstraint("strava_id", "user_id"),)
     user: Optional["User"] = Relationship(back_populates="activities")
 
@@ -31,7 +42,7 @@ class User(SQLModel, table=True):
     email: str = Field(index=True, nullable=False, unique=True)
     hashed_password: str
     strava_id: Optional[int] = Field(index=True, unique=True) 
-    strava_access_token: Optional[str] = Field(nullable=True)
+    strava_access_token: Optional[str] = Field(default=None, repr=False)
     profile_img_url: Optional[str] = Field(nullable=False, default="/default_user_img.jpg")
     activities: List[Activity] = Relationship(back_populates="user")
     teams: List["Team"] = Relationship(back_populates="members", link_model=UserTeamLink)
