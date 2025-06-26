@@ -1,0 +1,61 @@
+type LeaderboardItem = {
+  user_id: number;
+  value: number;
+};
+
+type Member = {
+  id: number;
+  name: string;
+  profile_img_url: string;
+};
+
+type LeaderBoxProps = {
+  title: string;
+  data: LeaderboardItem[];
+  unit: string;
+  members: Member[];
+};
+
+const medalEmoji = ["🥇", "🥈", "🥉"];
+
+export default function LeaderBox({ title, data, unit, members }: LeaderBoxProps) {
+  return (
+    <div className="bg-white rounded-xl shadow-md p-4">
+      <h3 className="text-lg font-semibold mb-3 text-center">{title}</h3>
+      <ul className="divide-y divide-gray-100">
+        {data.length === 0 ? (
+          <li className="text-gray-400 text-center py-2">Nessun dato disponibile</li>
+        ) : (
+          data.map((item, idx) => {
+            const user = members.find((m) => m.id === item.user_id);
+            const medal = medalEmoji[idx] || `#${idx + 1}`;
+            return (
+              <li key={item.user_id} className="flex items-center justify-between py-2">
+                <div className="flex items-center space-x-3">
+                  <span className="text-xl">{medal}</span>
+                  {user ? (
+                    <>
+                      <img
+                        src={
+                          user.profile_img_url.startsWith("/uploads/")
+                            ? `http://localhost:8000${user.profile_img_url}`
+                            : user.profile_img_url
+                        }
+                        alt={user.name}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      <span className="font-medium text-sm">{user.name}</span>
+                    </>
+                  ) : (
+                    <span className="text-sm text-gray-500 italic">Utente sconosciuto</span>
+                  )}
+                </div>
+                <span className="text-sm font-semibold">{item.value.toFixed(2)} {unit}</span>
+              </li>
+            );
+          })
+        )}
+      </ul>
+    </div>
+  );
+}

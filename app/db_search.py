@@ -1,13 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, Form
 from fastapi.responses import JSONResponse
 from app.database import get_session
-from app.models import User, Team, UserTeamLink
-from app.db_utils import get_user_activities
+from app.models import User, Team, UserTeamLink, Activity
+from app.custom_beans import TeamStatsResponse
 from sqlmodel import Session, select
 from app.auth_helpers import get_current_user
 import uuid
 import shutil
 import os
+from app.db_utils import (
+    get_user_activities,
+    get_month_range,
+    get_team_total_distance,
+    get_team_total_elevation,
+    get_leaderboard_sum,
+    get_leaderboard_max,
+)
 
 router = APIRouter()
 
@@ -112,3 +120,55 @@ async def create_team(
     db.add(link)
     db.commit()
     return JSONResponse(status_code=201, content={"message": "Team creato", "team_id": new_team.id})
+
+
+@router.get("/teams/{team_id}/stats", response_model=TeamStatsResponse)
+def get_team_stats(
+    team_id: int,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    # Verifica che l'utente sia membro del team
+    link = db.exec(
+        select(UserTeamLink).where(
+            UserTeamLink.team_id == team_id,
+            UserTeamLink.user_id == current_user.id
+        )
+    ).first()
+    if not link:
+        raise HTTPException(status_code=403, detail="Non sei membro di questo team")
+
+    # Ottieni gli ID dei membri del team
+    member_ids = db.exec(
+        select(UserTeamLink.user_id).where(UserTeamLink.team_id == team_id)
+    ).all()
+
+    # Range del mese corrente
+    start_month, end_month = get_month_range()
+
+    # Statistiche totali
+    total_distance = get_team_total_distance(db, member_ids, start_month, end_month)
+    total_elevation = get_team_total_elevation(db, member_ids, start_month, end_month)
+
+    # Leaderboards (top 3)
+    distance_lb = get_leaderboard_sum(db, member_ids, Activity.distance, start_month, end_month)
+    elevation_lb = get_leaderboard_sum(db, member_ids, Activity.elevation, start_month, end_month)
+    max_speed_lb = get_leaderboard_max(db, member_ids, Activity.max_speed, start_month, end_month)
+    elev_high_lb = get_leaderboard_max(db, member_ids, Activity.elev_high, start_month, end_month)
+
+    result = {
+        "total_distance_km": round(total_distance / 1000, 2),
+        "total_elevation_m": round(total_elevation, 1),
+        "leaderboards": {
+            "distance": distance_lb,
+            "elevation": elevation_lb,
+            "max_speed": max_speed_lb,
+            "elev_high": elev_high_lb,
+        }
+    }
+    print("Team stats:", result)
+    result["leaderboards"] = {
+        k: [{"user_id": uid, "value": val} for uid, val in v]
+        for k, v in result["leaderboards"].items()
+    }
+    return TeamStatsResponse(**result)

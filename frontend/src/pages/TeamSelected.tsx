@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
+import LeaderBox from "../components/LeaderBox";
 import { HomeIcon, UsersIcon, ActivityIcon } from "lucide-react"; // Usa lucide o FontAwesome
 
 type Member = {
@@ -24,6 +25,16 @@ export default function TeamSelected() {
   const [selectedTab, setSelectedTab] = useState<"home" | "members" | "activities">("home");
   const [emailToInvite, setEmailToInvite] = useState("");
   const [inviteMessage, setInviteMessage] = useState("");
+  const [stats, setStats] = useState<{
+    total_distance_km: number;
+    total_elevation_m: number;
+    leaderboards: {
+      distance: { user_id: number; value: number }[];
+      elevation: { user_id: number; value: number }[];
+      max_speed: { user_id: number; value: number }[];
+      elev_high: { user_id: number; value: number }[];
+    };
+  } | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -34,6 +45,16 @@ export default function TeamSelected() {
       .then(setTeam)
       .catch((err) => console.error("Errore nel caricamento del team", err));
   }, [id]);
+
+  useEffect(() => {
+  const token = localStorage.getItem("token");
+  fetch(`http://localhost:8000/db/teams/${id}/stats`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+    .then((res) => res.json())
+    .then(setStats)
+    .catch((err) => console.error("Errore nel caricamento statistiche", err));
+}, [id]);
 
   const handleInvite = async () => {
     const token = localStorage.getItem("token");
@@ -92,6 +113,42 @@ export default function TeamSelected() {
               className="w-32 h-32 rounded-full object-cover mb-4 mx-auto"
             />
             <h1 className="text-3xl font-bold">{team.name}</h1>
+            {stats ? (
+              <div>
+                <div className="mt-4 text-center">
+                  <p className="text-lg">🚴 Totale km percorsi: <strong>{stats.total_distance_km} km</strong></p>
+                  <p className="text-lg">⛰️ Totale dislivello: <strong>{stats.total_elevation_m} m</strong></p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                  <LeaderBox
+                    title="Distanza totale (km)"
+                    data={stats.leaderboards.distance}
+                    unit="km"
+                    members={team.members}
+                  />
+                  <LeaderBox
+                    title="Dislivello totale (m)"
+                    data={stats.leaderboards.elevation}
+                    unit="m"
+                    members={team.members}
+                  />
+                  <LeaderBox
+                    title="Velocità max (km/h)"
+                    data={stats.leaderboards.max_speed}
+                    unit="km/h"
+                    members={team.members}
+                  />
+                  <LeaderBox
+                    title="Altitudine massima (m)"
+                    data={stats.leaderboards.elev_high}
+                    unit="m"
+                    members={team.members}
+                  />
+                </div>
+              </div>
+            ) : (
+              <p className="text-center text-sm text-gray-500">Calcolo statistiche in corso...</p>
+            )}
           </div>
         )}
 

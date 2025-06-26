@@ -19,7 +19,7 @@ async def sync_activities(
 ):
     access_token = current_user.strava_access_token
     user_id = current_user.id
-
+    print(f"access token : {access_token}, user id : {user_id}")
     if not access_token:
         raise HTTPException(status_code=401, detail="User not connected to Strava")
 
@@ -29,10 +29,8 @@ async def sync_activities(
                 "https://www.strava.com/api/v3/athlete/activities",
                 headers={"Authorization": f"Bearer {access_token}"}
             )
-
             activities = res.json()
             filtered = [a for a in activities if a.get("type") in ["Run", "Hike"]]
-
             save_activities(filtered, user_id=user_id, db=db)
             return {"message": "Attività sincronizzate con Strava."}
     except Exception as e:

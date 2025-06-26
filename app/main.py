@@ -15,11 +15,17 @@ from sqlalchemy.orm import Session
 from jose import jwt
 import os
 from app.auth_helpers import SECRET_KEY, ALGORITHM
+import logging
 
-app = FastAPI()
+app = FastAPI(debug=True)
 create_db_and_tables()
 os.makedirs("uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 @app.post("/register")
 def register(user_input: User, session=Depends(get_session)):
