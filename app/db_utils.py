@@ -111,7 +111,7 @@ def get_leaderboard_sum(
         .order_by(desc("total"))
         .limit(limit)
     ).all()
-    return results
+    return format_lb_sum(column, results)
 
 
 def get_leaderboard_max(
@@ -133,4 +133,12 @@ def get_leaderboard_max(
         .order_by(desc("max"))
         .limit(limit)
     ).all()
-    return results
+    return format_lb_sum(column, results)
+
+
+def format_lb_sum(column, results):
+    if column == Activity.distance:
+        return [(r[0], r[1] / 1000) for r in results]
+    elif column == Activity.max_speed:
+        return [(r[0], r[1] * 3.6) for r in results]
+    return [(r[0], r[1]) for r in results]

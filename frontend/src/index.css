@@ -13,3 +13,7 @@
   --color-giallo: #ffd700;
   --color-arancio: #ffa500;
 }
+
+.scroll-smooth::-webkit-scrollbar {
+  display: none;
+}

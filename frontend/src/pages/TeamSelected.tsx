@@ -112,38 +112,49 @@ export default function TeamSelected() {
               alt={team.name}
               className="w-32 h-32 rounded-full object-cover mb-4 mx-auto"
             />
-            <h1 className="text-3xl font-bold">{team.name}</h1>
+            <div className="p-4 text-sm sm:text-base sm:p-6 lg:p-8">
+              <h1 className="text-lg font-semibold">{team.name}</h1>
+            </div>
             {stats ? (
               <div>
                 <div className="mt-4 text-center">
                   <p className="text-lg">🚴 Totale km percorsi: <strong>{stats.total_distance_km} km</strong></p>
                   <p className="text-lg">⛰️ Totale dislivello: <strong>{stats.total_elevation_m} m</strong></p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                  <LeaderBox
-                    title="Distanza totale (km)"
-                    data={stats.leaderboards.distance}
-                    unit="km"
-                    members={team.members}
-                  />
-                  <LeaderBox
-                    title="Dislivello totale (m)"
-                    data={stats.leaderboards.elevation}
-                    unit="m"
-                    members={team.members}
-                  />
-                  <LeaderBox
-                    title="Velocità max (km/h)"
-                    data={stats.leaderboards.max_speed}
-                    unit="km/h"
-                    members={team.members}
-                  />
-                  <LeaderBox
-                    title="Altitudine massima (m)"
-                    data={stats.leaderboards.elev_high}
-                    unit="m"
-                    members={team.members}
-                  />
+                
+                <div className="flex overflow-x-auto gap-4 px-4 py-2 snap-x scroll-smooth">
+                  <div className="flex-shrink-0 w-3/4 snap-center">
+                      <LeaderBox
+                        title="Distanza totale (km)"
+                        data={stats.leaderboards.distance}
+                        unit="km"
+                        members={team.members}
+                      />
+                  </div>
+                  <div className="flex-shrink-0 w-3/4 snap-center">
+                    <LeaderBox
+                      title="Dislivello totale (m)"
+                      data={stats.leaderboards.elevation}
+                      unit="m"
+                      members={team.members}
+                    />
+                  </div>
+                  <div className="flex-shrink-0 w-3/4 snap-center">
+                    <LeaderBox
+                      title="Velocità max (km/h)"
+                      data={stats.leaderboards.max_speed}
+                      unit="km/h"
+                      members={team.members}
+                    />
+                  </div>
+                  <div className="flex-shrink-0 w-3/4 snap-center">
+                    <LeaderBox
+                      title="Altitudine massima (m)"
+                      data={stats.leaderboards.elev_high}
+                      unit="m"
+                      members={team.members}
+                    />
+                  </div>
                 </div>
               </div>
             ) : (

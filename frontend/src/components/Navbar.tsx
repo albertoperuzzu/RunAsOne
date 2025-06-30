@@ -71,6 +71,15 @@ export default function Navbar() {
             </Link>
           </li>
           <li>
+            <Link
+              to="/profile"
+              onClick={() => setIsOpen(false)}
+              className="block hover:underline"
+            >
+              Profilo
+            </Link>
+          </li>
+          <li>
             <button
               onClick={handleLogout}
               className="w-full text-right hover:underline"
