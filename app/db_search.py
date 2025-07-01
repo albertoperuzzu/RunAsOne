@@ -172,3 +172,22 @@ def get_team_stats(
         for k, v in result["leaderboards"].items()
     }
     return TeamStatsResponse(**result)
+
+
+@router.get("/getUserInfo")
+def get_my_teams(
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    user = db.exec(select(User).where(User.id == current_user.id)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    result = {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "profile_img_url": user.profile_img_url,
+        "activities_count": len(user.activities),
+        "teams_count": len(user.teams)
+    }
+    return result

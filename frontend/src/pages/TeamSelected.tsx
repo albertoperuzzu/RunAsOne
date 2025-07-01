@@ -123,7 +123,7 @@ export default function TeamSelected() {
                 </div>
                 
                 <div className="flex overflow-x-auto gap-4 px-4 py-2 snap-x scroll-smooth">
-                  <div className="flex-shrink-0 w-3/4 snap-center">
+                  <div className="flex-shrink-0 w-4/5 snap-center">
                       <LeaderBox
                         title="Distanza totale (km)"
                         data={stats.leaderboards.distance}
@@ -131,7 +131,7 @@ export default function TeamSelected() {
                         members={team.members}
                       />
                   </div>
-                  <div className="flex-shrink-0 w-3/4 snap-center">
+                  <div className="flex-shrink-0 w-4/5 snap-center">
                     <LeaderBox
                       title="Dislivello totale (m)"
                       data={stats.leaderboards.elevation}
@@ -139,7 +139,7 @@ export default function TeamSelected() {
                       members={team.members}
                     />
                   </div>
-                  <div className="flex-shrink-0 w-3/4 snap-center">
+                  <div className="flex-shrink-0 w-4/5 snap-center">
                     <LeaderBox
                       title="Velocità max (km/h)"
                       data={stats.leaderboards.max_speed}
@@ -147,7 +147,7 @@ export default function TeamSelected() {
                       members={team.members}
                     />
                   </div>
-                  <div className="flex-shrink-0 w-3/4 snap-center">
+                  <div className="flex-shrink-0 w-4/5 snap-center">
                     <LeaderBox
                       title="Altitudine massima (m)"
                       data={stats.leaderboards.elev_high}

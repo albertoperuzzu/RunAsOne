@@ -1,79 +1,107 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
+import { Pencil } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+type User = {
+    id: number;
+    name: string;
+    email: string;
+    profile_img_url: string;
+    activities_count: number;
+    teams_count: number;
+};
 
 export default function ProfilePage() {
-  const [newPassword, setNewPassword] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  //const [fieldToEdit, setFieldToEdit] = useState<null | string>(null);
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
-  const handlePasswordChange = () => {
-    // TODO: API call per cambiare la password
-    alert("Password cambiata!");
-  };
-
-  const handleImageUpload = () => {
-    if (!selectedFile) return;
-    // TODO: API call per caricare immagine
-    alert(`Immagine caricata: ${selectedFile.name}`);
-  };
-
-  const handleLeaveTeam = () => {
-    // TODO: API call per uscire dal team
-    if (confirm("Sei sicuro di voler lasciare il team?")) {
-      alert("Hai lasciato il team.");
-    }
-  };
+  useEffect(() => {
+        fetch("http://localhost:8000/db/getUserInfo", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+        }
+        })
+        .then(async (res) => {
+            if (!res.ok) throw new Error("Errore nel caricamento dei team");
+            return res.json();
+        })
+        .then((data) => {
+            setUser(data);
+            console.log(data);
+        })
+        .catch((err) => {
+            console.error(err);
+        });
+  }, []);
 
   return (
+
     <div className="max-w-md mx-auto p-4 space-y-6">
-        <Navbar />
-      <h1 className="text-2xl font-bold text-center">Il tuo profilo</h1>
+      <Navbar />
+      <h1 className="text-2xl font-bold text-center mb-4">Il tuo profilo</h1>
+      {user && (
+        <div className="bg-white rounded-xl shadow p-4 space-y-4">
+            {/* Foto profilo */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                    <img
+                    src={
+                        user.profile_img_url.startsWith("profiles/")
+                          ? `http://localhost:8000/uploads/${user.profile_img_url}`
+                          : user.profile_img_url
+                      }
+                    alt="Profile"
+                    className="w-14 h-14 rounded-full object-cover"
+                    />
+                    <span className="font-medium">{user.name}</span>
+                </div>
+                <button onClick={() => navigate("/edit-profile?field=image")}><Pencil size={18} /></button>
+            </div>
 
-      {/* Cambia password */}
-      <section className="bg-white p-4 rounded-xl shadow space-y-3">
-        <h2 className="text-lg font-semibold">Cambia password</h2>
-        <input
-          type="password"
-          placeholder="Nuova password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          className="w-full border rounded px-3 py-2"
-        />
-        <button
-          onClick={handlePasswordChange}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-        >
-          Aggiorna password
-        </button>
-      </section>
+            {/* Email */}
+            <div className="flex justify-between items-center">
+                <div className="text-sm">
+                    <div className="text-gray-500">Email</div>
+                    <div>{user.email}</div>
+                </div>
+                <button onClick={() => navigate("/edit-profile?field=email")}><Pencil size={18} /></button>
+            </div>
 
-      {/* Carica immagine profilo */}
-      <section className="bg-white p-4 rounded-xl shadow space-y-3">
-        <h2 className="text-lg font-semibold">Immagine del profilo</h2>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
-          className="w-full"
-        />
-        <button
-          onClick={handleImageUpload}
-          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-        >
-          Carica immagine
-        </button>
-      </section>
+            {/* Nome */}
+            <div className="flex justify-between items-center">
+                <div className="text-sm">
+                    <div className="text-gray-500">Nome</div>
+                    <div>{user.name}</div>
+                </div>
+                <button onClick={() => navigate("/edit-profile?field=name")}><Pencil size={18} /></button>
+            </div>
 
-      {/* Lascia team */}
-      <section className="bg-white p-4 rounded-xl shadow space-y-3">
-        <h2 className="text-lg font-semibold text-red-600">Lascia il team</h2>
-        <p className="text-sm text-gray-600">Questa azione non è reversibile.</p>
-        <button
-          onClick={handleLeaveTeam}
-          className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700"
-        >
-          Esci dal team
-        </button>
-      </section>
+            {/* Password */}
+            <div className="flex justify-between items-center">
+                <div className="text-sm">
+                    <div className="text-gray-500">Password</div>
+                    <div>••••••••</div>
+                </div>
+                <button onClick={() => navigate("/edit-profile?field=pwd")}><Pencil size={18} /></button>
+            </div>
+
+            {/* Statistiche */}
+            <div className="grid grid-cols-2 text-center text-sm mt-4 border-t pt-4">
+            <div>
+                <div className="text-gray-500">Attività</div>
+                <div className="font-semibold">{user.activities_count}</div>
+            </div>
+            <div>
+                <div className="text-gray-500">Team</div>
+                <div className="font-semibold">{user.teams_count}</div>
+            </div>
+            </div>
+        </div>
+      )}
     </div>
   );
 }
