@@ -72,6 +72,7 @@ def get_team(
         select(UserTeamLink).where(UserTeamLink.team_id == team_id)
     ).all()
     members = []
+    activities = []
     for l in member_links:
         user = db.get(User, l.user_id)
         if user:
@@ -88,12 +89,24 @@ def get_team(
                 "activities": user.activities
             })
 
+            for a in user.activities:
+                activities.append({
+                    "id": a.id,
+                    "name": a.name,
+                    "distance": a.distance,
+                    "summary_polyline": a.summary_polyline,
+                    "date": a.date
+                })
+
+    activities.sort(key=lambda x: x["date"], reverse=True)
+
     return {
         "id": team.id,
         "name": team.name,
         "image_url": team.image_url,
         "is_admin": link.role == "admin",
-        "members": members
+        "members": members,
+        "activities": activities
     }
 
 

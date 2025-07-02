@@ -4,6 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import { AuthProvider } from "./context/AuthContext";
 import { UserProvider } from "./context/UserContext";
+import "leaflet/dist/leaflet.css";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

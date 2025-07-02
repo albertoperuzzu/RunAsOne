@@ -7,7 +7,9 @@ from sqlalchemy import desc
 
 def get_user_activities(user_id: int, db: Session):
     return db.exec(
-        select(Activity).where(Activity.user_id == user_id)
+        select(Activity)
+        .where(Activity.user_id == user_id)
+        .order_by(desc(Activity.date))
     ).all()
 
 
@@ -22,7 +24,7 @@ def get_activity_by_strava_id(user_id: int, strava_id: int, db: Session):
 
 def get_month_range():
     now = datetime.now()
-    start = now.replace(month=now.month-1, day=1, hour=0, minute=0, second=0, microsecond=0)
+    start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     if now.month == 12:
         end = start.replace(year=now.year + 1, month=1)
     else:

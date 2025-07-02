@@ -1,9 +1,11 @@
 import Button from "./Button";
+import MapPreview from "./MapPreview";
 
 type Activity = {
   id: number;
   name: string;
   distance: number;
+  summary_polyline?: string;
 };
 
 type Props = {
@@ -17,6 +19,9 @@ export default function ActivityCard({ activity }: Props) {
       <p className="text-sm text-gray-600">
         Distanza: {(activity.distance / 1000).toFixed(2)} km
       </p>
+      {activity.summary_polyline && (
+        <MapPreview encodedPolyline={activity.summary_polyline} />
+      )}
       <Button
         variant="primary"
         onClick={() => {

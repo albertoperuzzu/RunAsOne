@@ -11,12 +11,20 @@ type Member = {
   role: string;
 };
 
+type Activity = {
+  id: number;
+  name: string;
+  distance: number;
+  summary_polyline?: string;
+};
+
 type Team = {
   id: number;
   name: string;
   image_url: string;
   is_admin: boolean;
   members: Member[];
+  activities: Activity[];
 };
 
 export default function TeamSelected() {
@@ -42,7 +50,11 @@ export default function TeamSelected() {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
-      .then(setTeam)
+      //.then(setTeam)
+      .then((data) => {
+        console.log("Team JSON:", data);
+        setTeam(data); 
+      })
       .catch((err) => console.error("Errore nel caricamento del team", err));
   }, [id]);
 
