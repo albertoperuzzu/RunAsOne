@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import LeaderBox from "../components/LeaderBox";
+import ActivityCard from "../components/ActivityCard";
 import { HomeIcon, UsersIcon, ActivityIcon } from "lucide-react"; // Usa lucide o FontAwesome
 
 type Member = {
@@ -52,7 +53,7 @@ export default function TeamSelected() {
       .then((res) => res.json())
       //.then(setTeam)
       .then((data) => {
-        console.log("Team JSON:", data);
+        //console.log("Team JSON:", data);
         setTeam(data); 
       })
       .catch((err) => console.error("Errore nel caricamento del team", err));
@@ -115,7 +116,6 @@ export default function TeamSelected() {
     <div className="flex flex-col min-h-screen pb-20">
       <Navbar />
 
-      {/* Contenuto dinamico */}
       <div className="flex-grow px-6">
         {selectedTab === "home" && (
           <div className="text-center">
@@ -235,12 +235,18 @@ export default function TeamSelected() {
         {selectedTab === "activities" && (
           <div className="text-center mt-10">
             <h2 className="text-xl font-semibold">Attività del team</h2>
-            <p className="text-gray-500 text-sm mt-2">In arrivo...</p>
+            <ul className="space-y-2">
+              {team.activities.map((act) => (
+                <li key={act.id}>
+                  <ActivityCard activity={act} />
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>
 
-      {/* Menu fisso in basso */}
+      {/* Menu */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-md z-50">
         <div className="flex justify-around py-3">
           <button onClick={() => setSelectedTab("home")} className="flex flex-col items-center text-sm">

@@ -8,8 +8,6 @@ type Props = {
 
 const PrivateRoute = ({ children }: Props) => {
   const { isAuthenticated } = useAuth();
-  //console.log("TOKEN:", localStorage.getItem("token"));
-  //console.log("isAuthenticated:", isAuthenticated);
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }

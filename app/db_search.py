@@ -141,7 +141,7 @@ def get_team_stats(
     db: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    # Verifica che l'utente sia membro del team
+    # Verifica user nel team
     link = db.exec(
         select(UserTeamLink).where(
             UserTeamLink.team_id == team_id,
@@ -150,20 +150,16 @@ def get_team_stats(
     ).first()
     if not link:
         raise HTTPException(status_code=403, detail="Non sei membro di questo team")
-
-    # Ottieni gli ID dei membri del team
+    # Get degli id del team
     member_ids = db.exec(
         select(UserTeamLink.user_id).where(UserTeamLink.team_id == team_id)
     ).all()
-
-    # Range del mese corrente
+    # Determina il mese
     start_month, end_month = get_month_range()
-
-    # Statistiche totali
+    # Preleva le statistiche del mese
     total_distance = get_team_total_distance(db, member_ids, start_month, end_month)
     total_elevation = get_team_total_elevation(db, member_ids, start_month, end_month)
-
-    # Leaderboards (top 3)
+    # Classifica (top 3) dei membri
     distance_lb = get_leaderboard_sum(db, member_ids, Activity.distance, start_month, end_month)
     elevation_lb = get_leaderboard_sum(db, member_ids, Activity.elevation, start_month, end_month)
     max_speed_lb = get_leaderboard_max(db, member_ids, Activity.max_speed, start_month, end_month)

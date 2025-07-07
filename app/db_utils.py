@@ -1,7 +1,7 @@
-from sqlmodel import Session, select, text, func
+from sqlmodel import Session, select, func
 from app.models import Activity
 from datetime import datetime
-from typing import List, Tuple
+from typing import List
 from sqlalchemy import desc
 
 

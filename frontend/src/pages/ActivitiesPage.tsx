@@ -46,7 +46,7 @@ export default function AttivitiesPage() {
         }
       });
       if (!res.ok) throw new Error("Errore durante la sincronizzazione con Strava");
-      await fetchActivities(); // ricarica dal DB dopo sync
+      await fetchActivities();
     } catch (err) {
       console.error(err);
       setError("Errore durante la sincronizzazione con Strava.");
