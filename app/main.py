@@ -21,6 +21,7 @@ import logging
 app = FastAPI(debug=True)
 create_db_and_tables()
 os.makedirs("uploads", exist_ok=True)
+
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 logging.basicConfig(
@@ -28,6 +29,21 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
+# ===========================
+# CORS PER LOCALE IN DEV
+# ===========================
+if os.getenv("RENDER") != "true":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+# ===========================
+# API
+# ===========================
 @app.post("/register")
 def register(user_input: User, session=Depends(get_session)):
     existing_user = session.exec(
@@ -41,24 +57,42 @@ def register(user_input: User, session=Depends(get_session)):
     session.refresh(user_input)
     return {"id": user_input.id, "email": user_input.email, "nickname": user_input.name}
 
+
 @app.post("/login")
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_session)):
     user = db.exec(select(User).where(User.email == form.username)).first()
-    if not user or not verify_password(form.password, user.hashed_password):
+    if not user or verify_password(form.password, user.hashed_password) is False:
         raise HTTPException(status_code=401, detail="Credenziali errate")
     token = jwt.encode({"user_id": user.id}, SECRET_KEY, algorithm=ALGORITHM)
-    return {"access_token": token, "token_type": "bearer", "nickname": user.name, "profile_img_url" : user.profile_img_url}
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "nickname": user.name,
+        "profile_img_url": user.profile_img_url,
+    }
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 app.include_router(auth_router, prefix="")
 app.include_router(strava_router, prefix="/strava_api")
 app.include_router(db_router, prefix="/db")
 app.include_router(invites_router, prefix="/handle_invites")
 app.include_router(profile_router, prefix="/handle_profile")
+
+# ===========================
+# SERVE FRONTEND SOLO IN PRODUZIONE
+# ===========================
+if os.getenv("RENDER") == "true":
+    frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
+
+    # Serve assets statici
+    app.mount("/static", StaticFiles(directory=os.path.join(frontend_dir, "static")), name="static")
+
+    from fastapi.responses import FileResponse
+
+    @app.get("/", include_in_schema=False)
+    async def serve_index():
+        return FileResponse(os.path.join(frontend_dir, "index.html"))
+
+    @app.get("/{path:path}", include_in_schema=False)
+    async def serve_spa(path: str):
+        return FileResponse(os.path.join(frontend_dir, "index.html"))
