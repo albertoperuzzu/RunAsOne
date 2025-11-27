@@ -4,7 +4,7 @@ import Button from "../components/Button";
 import Navbar from "../components/Navbar";
 import { useUser } from "../context/UserContext";
 import API_BASE_URL from "../config";
-import logo from "/runasone.png";
+import logo from "../assets/runasone.png";
 
 function HomePage() {
 
