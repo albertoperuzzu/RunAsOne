@@ -9,7 +9,9 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    # Troncamento della password a 72 caratteri per rispettare il limite di bcrypt
+    password_safe = password[:72] 
+    return pwd_context.hash(password_safe)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
