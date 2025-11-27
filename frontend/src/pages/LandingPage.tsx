@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
+import logo from "/runasone.png";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -7,7 +8,7 @@ function LandingPage() {
   return (
     <div className="flex flex-col items-center justify-center h-screen text-gray-800">
       <img
-        src="/runasone.png"
+        src={logo}
         alt="RunAsOne logo"
         className="w-40 h-40 mb-8"
       />
