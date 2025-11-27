@@ -18,7 +18,8 @@ export default function RegisterPage() {
 
     if (res.ok) {
       alert("Registrazione completata. Ora effettua il login.");
-      window.location.href = "/login";
+      navigate("/login"); 
+      //window.location.href = "/login";
     } else {
       alert("Errore durante la registrazione");
     }
