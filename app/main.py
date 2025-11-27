@@ -94,8 +94,6 @@ if os.getenv("RENDER") == "true":
 
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dir, "assets")), name="assets")
 
-    app.mount("/public", StaticFiles(directory=os.path.join(frontend_dir, "public")), name="public")
-
     from fastapi.responses import FileResponse
 
     @app.get("/{path:path}", include_in_schema=False)
