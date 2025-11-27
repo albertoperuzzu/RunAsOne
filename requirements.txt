@@ -21,3 +21,4 @@ uvloop
 httptools
 websockets
 python-jose
+bcrypt
