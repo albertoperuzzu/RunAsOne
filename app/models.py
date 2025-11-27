@@ -47,6 +47,10 @@ class User(SQLModel, table=True):
     activities: List[Activity] = Relationship(back_populates="user")
     teams: List["Team"] = Relationship(back_populates="members", link_model=UserTeamLink)
 
+class UserCreate(SQLModel):
+    email: str
+    name: str
+    password: str
 
 class TeamInvite(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)

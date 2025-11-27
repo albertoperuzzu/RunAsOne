@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from sqlmodel import select
-from app.models import User
+from app.models import User, UserCreate
 from app.utils import hash_password, verify_password
 from app.database import engine, create_db_and_tables, get_session
 from fastapi.middleware.cors import CORSMiddleware
@@ -45,17 +45,22 @@ if os.getenv("RENDER") != "true":
 # API
 # ===========================
 @app.post("/register")
-def register(user_input: User, session=Depends(get_session)):
+def register(user_input: UserCreate, session=Depends(get_session)):
     existing_user = session.exec(
         select(User).where(User.email == user_input.email)
     ).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email già registrata.")
-    user_input.hashed_password = hash_password(user_input.hashed_password)
-    session.add(user_input)
+
+    new_user = User(
+        email=user_input.email,
+        name=user_input.name,
+        hashed_password=hash_password(user_input.password)
+    )
+    session.add(new_user)
     session.commit()
-    session.refresh(user_input)
-    return {"id": user_input.id, "email": user_input.email, "nickname": user_input.name}
+    session.refresh(new_user)
+    return {"id": new_user.id, "email": new_user.email, "nickname": new_user.name}
 
 
 @app.post("/login")
