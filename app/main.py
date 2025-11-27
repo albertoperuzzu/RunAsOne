@@ -85,7 +85,8 @@ if os.getenv("RENDER") == "true":
     frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
 
     # Serve assets statici
-    app.mount("/static", StaticFiles(directory=os.path.join(frontend_dir, "static")), name="static")
+    # app.mount("/static", StaticFiles(directory=os.path.join(frontend_dir, "static")), name="static")
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 
     from fastapi.responses import FileResponse
 
