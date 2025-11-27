@@ -29,25 +29,16 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-# ===========================
-# CORS PER LOCALE IN DEV
-# ===========================
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://runasone.onrender.com/"
+]
+
 if os.getenv("RENDER") != "true":
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-
-# ===========================
-# CORS PER PROD
-# ===========================
-if os.getenv("RENDER") == "true":
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["https://runasone.onrender.com"],
+        allow_origins=origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
