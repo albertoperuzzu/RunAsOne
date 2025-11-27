@@ -42,6 +42,18 @@ if os.getenv("RENDER") != "true":
     )
 
 # ===========================
+# CORS PER PROD
+# ===========================
+if os.getenv("RENDER") == "true":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["https://runasone.onrender.com"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+# ===========================
 # API
 # ===========================
 @app.post("/register")
