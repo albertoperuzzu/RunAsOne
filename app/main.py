@@ -32,17 +32,16 @@ logging.basicConfig(
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://runasone.onrender.com/"
+    "https://runasone.onrender.com"
 ]
 
-if os.getenv("RENDER") != "true":
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ===========================
 # API
