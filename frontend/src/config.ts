@@ -1,3 +1,3 @@
 const API_BASE_URL =
-  import.meta.env.PROD ? window.location.origin : "http://localhost:8000";
+  import.meta.env.PROD ? import.meta.env.VITE_API_BASE_URL : "http://localhost:8000";
 export default API_BASE_URL;
