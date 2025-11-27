@@ -1,3 +1,5 @@
+import API_BASE_URL from "../config";
+
 type LeaderboardItem = {
   user_id: number;
   value: number;
@@ -36,7 +38,7 @@ export default function LeaderBox({ title, data, unit, members }: LeaderBoxProps
                   {user ? (
                     <>
                       <img
-                        src={ user.profile_img_url.startsWith("/uploads/") ? `http://localhost:8000${user.profile_img_url}` : user.profile_img_url }
+                        src={ user.profile_img_url.startsWith("/uploads/") ? `${API_BASE_URL}${user.profile_img_url}` : user.profile_img_url }
                         alt={ user.name }
                         className="w-8 h-8 rounded-full object-cover"
                       />

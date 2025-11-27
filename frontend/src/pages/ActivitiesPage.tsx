@@ -3,6 +3,7 @@ import ActivityCard from "../components/ActivityCard";
 import Navbar from "../components/Navbar";
 import Button from "../components/Button";
 import { RefreshCcw } from "lucide-react";
+import API_BASE_URL from "../config";
 
 type Activity = {
   id: number;
@@ -19,7 +20,7 @@ export default function AttivitiesPage() {
   const fetchActivities = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/db/getDBActivities", {
+      const res = await fetch(`${API_BASE_URL}/db/getDBActivities`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -39,7 +40,7 @@ export default function AttivitiesPage() {
   const syncWithStrava = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/strava_api/syncActivities", {
+      const res = await fetch(`${API_BASE_URL}/strava_api/syncActivities`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"

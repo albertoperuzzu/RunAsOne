@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import API_BASE_URL from "../config";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -14,7 +15,7 @@ export default function EditProfile() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    fetch("http://localhost:8000/db/getUserInfo", {
+    fetch(`${API_BASE_URL}/db/getUserInfo`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json"
@@ -35,7 +36,7 @@ export default function EditProfile() {
     }
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://localhost:8000/handle_profile/update_name", {
+      const res = await fetch(`${API_BASE_URL}/handle_profile/update_name`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -62,7 +63,7 @@ export default function EditProfile() {
     }
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://localhost:8000/handle_profile/update_email", {
+      const res = await fetch(`${API_BASE_URL}/handle_profile/update_email`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +92,7 @@ export default function EditProfile() {
     }
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://localhost:8000/handle_profile/update_password", {
+      const res = await fetch(`${API_BASE_URL}/handle_profile/update_password`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -120,7 +121,7 @@ export default function EditProfile() {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const uploadRes = await fetch("http://localhost:8000/handle_profile/upload_image", {
+      const uploadRes = await fetch(`${API_BASE_URL}/handle_profile/upload_image`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -131,7 +132,7 @@ export default function EditProfile() {
       if (!uploadRes.ok) throw new Error("Errore durante l'upload dell'immagine");
       const { filename } = await uploadRes.json();
 
-      const updateRes = await fetch("http://localhost:8000/handle_profile/update_image", {
+      const updateRes = await fetch(`${API_BASE_URL}/handle_profile/update_image`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

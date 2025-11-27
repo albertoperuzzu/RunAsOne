@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import Navbar from "../components/Navbar";
 import { useUser } from "../context/UserContext";
+import API_BASE_URL from "../config";
 
 function HomePage() {
 
@@ -18,7 +19,7 @@ function HomePage() {
 
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("http://localhost:8000/handle_invites/check_invites", {
+      fetch(`${API_BASE_URL}/handle_invites/check_invites`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -58,7 +59,7 @@ function HomePage() {
               variant="strava"
               onClick={() => {
                 const token = localStorage.getItem("token");
-                window.location.href = `http://localhost:8000/strava_login?token=${token}`;
+                window.location.href = `${API_BASE_URL}/strava_login?token=${token}`;
               }}
             >
               Connetti a Strava

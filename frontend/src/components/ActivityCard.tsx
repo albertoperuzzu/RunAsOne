@@ -1,5 +1,6 @@
 import Button from "./Button";
 import MapPreview from "./MapPreview";
+import API_BASE_URL from "../config";
 
 type Activity = {
   id: number;
@@ -25,7 +26,7 @@ export default function ActivityCard({ activity }: Props) {
       <Button
         variant="primary"
         onClick={() => {
-          const url = `http://localhost:8000/strava_api/${activity.id}/export_gpx`;
+          const url = `${API_BASE_URL}/strava_api/${activity.id}/export_gpx`;
           window.location.href = url;
         }}
       >

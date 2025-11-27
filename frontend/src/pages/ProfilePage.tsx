@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import { Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import API_BASE_URL from "../config";
 
 type User = {
     id: number;
@@ -18,7 +19,7 @@ export default function ProfilePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-        fetch("http://localhost:8000/db/getUserInfo", {
+        fetch(`${API_BASE_URL}/db/getUserInfo`, {
         headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json"
@@ -50,7 +51,7 @@ export default function ProfilePage() {
                     <img
                     src={
                         user.profile_img_url.startsWith("profiles/")
-                          ? `http://localhost:8000/uploads/${user.profile_img_url}`
+                          ? `${API_BASE_URL}/uploads/${user.profile_img_url}`
                           : user.profile_img_url
                       }
                     alt="Profile"

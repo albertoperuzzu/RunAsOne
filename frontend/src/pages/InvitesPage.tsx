@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
+import API_BASE_URL from "../config";
 
 type Invite = {
   id: number;
@@ -18,7 +19,7 @@ export default function InvitesPage() {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    fetch("http://localhost:8000/handle_invites/check_invites", {
+    fetch(`${API_BASE_URL}/handle_invites/check_invites`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -32,7 +33,7 @@ export default function InvitesPage() {
   const acceptInvite = async (inviteId: number) => {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`http://localhost:8000/handle_invites/invites/${inviteId}/accept`, {
+    const res = await fetch(`${API_BASE_URL}/handle_invites/invites/${inviteId}/accept`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -50,7 +51,7 @@ export default function InvitesPage() {
   const rejectInvite = async (inviteId: number) => {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`http://localhost:8000/handle_invites/invites/${inviteId}/reject`, {
+    const res = await fetch(`${API_BASE_URL}/handle_invites/invites/${inviteId}/reject`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,

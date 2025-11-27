@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Button from "../components/Button";
+import API_BASE_URL from "../config";
 
 type Team = {
   id: number;
@@ -17,7 +18,7 @@ export default function TeamPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:8000/db/getTeams", {
+    fetch(`${API_BASE_URL}/db/getTeams`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json"
@@ -62,7 +63,7 @@ export default function TeamPage() {
                       className="cursor-pointer border rounded-lg p-4 bg-white/60 shadow hover:shadow-lg transition flex items-center gap-4"
                     >
                       <img
-                        src={`http://localhost:8000/uploads/${team.image_url}`}
+                        src={`${API_BASE_URL}/uploads/${team.image_url}`}
                         alt={team.name}
                         className="w-16 h-16 object-cover rounded-full"
                       />

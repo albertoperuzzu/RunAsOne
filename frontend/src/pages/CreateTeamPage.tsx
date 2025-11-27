@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import API_BASE_URL from "../config";
 
 export default function CreateTeamPage() {
   const [name, setName] = useState("");
@@ -19,7 +20,7 @@ export default function CreateTeamPage() {
     formData.append("image", image);
 
     try {
-      const res = await fetch("http://localhost:8000/db/create_team", {
+      const res = await fetch(`${API_BASE_URL}/db/create_team`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`
