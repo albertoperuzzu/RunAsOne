@@ -20,3 +20,4 @@ watchfiles
 uvloop
 httptools
 websockets
+python-jose
