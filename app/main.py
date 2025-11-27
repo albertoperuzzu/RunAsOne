@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlmodel import select
 from app.models import User, UserCreate
 from app.utils import hash_password, verify_password
-from app.database import engine, create_db_and_tables, get_session
+from app.database import get_session, create_db_and_tables
 from fastapi.middleware.cors import CORSMiddleware
 from app.strava_auth import router as auth_router
 from app.strava_api import router as strava_router
@@ -17,18 +17,26 @@ from jose import jwt
 import os
 from app.auth_helpers import SECRET_KEY, ALGORITHM
 import logging
+from fastapi.responses import FileResponse
 
 app = FastAPI(debug=True)
+
+# Crea DB e cartelle necessarie
 create_db_and_tables()
 os.makedirs("uploads", exist_ok=True)
 
+# Monta cartella upload
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
+# Logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
+# ===========================
+# CORS
+# ===========================
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -48,10 +56,8 @@ app.add_middleware(
 # API
 # ===========================
 @app.post("/register")
-def register(user_input: UserCreate, session=Depends(get_session)):
-    existing_user = session.exec(
-        select(User).where(User.email == user_input.email)
-    ).first()
+def register(user_input: UserCreate, session: Session = Depends(get_session)):
+    existing_user = session.exec(select(User).where(User.email == user_input.email)).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email già registrata.")
 
@@ -79,7 +85,7 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
         "profile_img_url": user.profile_img_url,
     }
 
-
+# Include routers
 app.include_router(auth_router, prefix="")
 app.include_router(strava_router, prefix="/strava_api")
 app.include_router(db_router, prefix="/db")
@@ -92,10 +98,7 @@ app.include_router(profile_router, prefix="/handle_profile")
 if os.getenv("RENDER") == "true":
     frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
 
-    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dir, "assets")), name="assets")
-    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
-
-    from fastapi.responses import FileResponse
+    app.mount("/assets", StaticFiles(directory=frontend_dir), name="assets")
 
     @app.get("/{path:path}", include_in_schema=False)
     async def serve_spa(path: str):

@@ -70,4 +70,7 @@ async def callback(
     user.strava_access_token = access_token
     db.commit()
 
+    if os.getenv("RENDER") == "true":
+        return RedirectResponse(url="https://runasone.onrender.com/strava-redirect")
+
     return RedirectResponse(url="http://localhost:5173/strava-redirect")
