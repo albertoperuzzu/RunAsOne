@@ -98,6 +98,14 @@ if os.getenv("RENDER") == "true":
     # app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dir, "assets")), name="assets")
 
+    @app.get("/privacy.html", include_in_schema=False)
+    async def serve_privacy():
+        return FileResponse(os.path.join(frontend_dir, "privacy.html"))
+
+    @app.get("/terms.html", include_in_schema=False)
+    async def serve_terms():
+        return FileResponse(os.path.join(frontend_dir, "terms.html"))
+
     @app.get("/{path:path}", include_in_schema=False)
     async def spa_fallback(path: str):
         return FileResponse(os.path.join(frontend_dir, "index.html"))
