@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import { useUser } from "../context/UserContext";
 import API_BASE_URL from "../config";
 import logo from "../assets/runasone.png";
@@ -104,6 +105,7 @@ function HomePage() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

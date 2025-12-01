@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import logo from "../assets/runasone.png";
+import Footer from "../components/Footer";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ function LandingPage() {
       <Button variant="primary" onClick={() => navigate("/register")}>
         Registrati
       </Button>
+      <Footer />
     </div>
   );
 }
