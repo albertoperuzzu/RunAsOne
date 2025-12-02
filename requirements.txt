@@ -22,3 +22,4 @@ httptools
 websockets
 python-jose
 bcrypt
+psycopg2-binary
