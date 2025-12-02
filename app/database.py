@@ -8,7 +8,7 @@ if os.getenv("RENDER") == "true":
         echo=True
     )
 else:
-    DATABASE_URL = "sqlite:///local.db"
+    DATABASE_URL = "sqlite:///database.db"
     engine = create_engine(
         DATABASE_URL,
         echo=True,

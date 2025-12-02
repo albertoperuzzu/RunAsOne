@@ -1,9 +1,14 @@
+import os
 from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
 from sqlalchemy import Column, JSON, BigInteger
 from sqlalchemy.dialects.postgresql import JSONB
 from typing import Optional, List
 from datetime import datetime
 
+if os.environ.get("DATABASE_URL", "").startswith("postgres"):
+    JsonType = JSONB
+else:
+    JsonType = JSON
 
 class Activity(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -14,8 +19,8 @@ class Activity(SQLModel, table=True):
     user_id: int = Field(foreign_key="user.id", nullable=False)
     activity_type: str = Field(default=None, alias="type")
     date: datetime
-    start_act: Optional[List[float]] = Field(sa_column=Column(JSONB), default=None)
-    end_act: Optional[List[float]] = Field(sa_column=Column(JSONB), default=None)
+    start_act: Optional[List[float]] = Field(sa_column=Column(JsonType), default=None)
+    end_act: Optional[List[float]] = Field(sa_column=Column(JsonType), default=None)
     summary_polyline: Optional[str] = Field(default=None)
     avg_speed : Optional[float] = Field(default=None)
     max_speed : Optional[float] = Field(default=None)
