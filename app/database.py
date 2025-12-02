@@ -17,6 +17,8 @@ else:
 
 
 def create_db_and_tables():
+    print("RENDER =", os.getenv("RENDER"))
+    print("DATABASE_URL =", DATABASE_URL)
     SQLModel.metadata.create_all(engine)
 
 
