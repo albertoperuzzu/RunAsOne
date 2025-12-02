@@ -1,13 +1,25 @@
 import os
-from sqlmodel import create_engine, SQLModel, Session
+from sqlmodel import SQLModel, create_engine, Session
 
-os.makedirs("data", exist_ok=True)
+if os.getenv("RENDER") == "true":
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    engine = create_engine(
+        DATABASE_URL,
+        echo=True
+    )
+else:
+    DATABASE_URL = "sqlite:///local.db"
+    engine = create_engine(
+        DATABASE_URL,
+        echo=True,
+        connect_args={"check_same_thread": False}
+    )
 
-engine = create_engine("sqlite:///./data/database.db")
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
 
+
 def get_session():
-    with Session(engine) as s:
-        yield s
+    with Session(engine) as session:
+        yield session
