@@ -94,9 +94,11 @@ if os.getenv("RENDER") == "true":
     from fastapi.responses import FileResponse
     
     frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
+    public_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "public")
 
     # app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dir, "assets")), name="assets")
+    app.mount("/public", StaticFiles(directory=public_dir), name="public")
 
     @app.get("/privacy.html", include_in_schema=False)
     async def serve_privacy():
