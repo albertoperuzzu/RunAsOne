@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
-from sqlalchemy import Column, JSON
+from sqlalchemy import Column, JSON, BigInteger
 from sqlalchemy.dialects.postgresql import JSONB
 from typing import Optional, List
 from datetime import datetime
@@ -7,7 +7,7 @@ from datetime import datetime
 
 class Activity(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    strava_id: int = Field(index=True, nullable=False)
+    strava_id: int = Field(sa_column=Column(BigInteger, nullable=False, index=True))
     name: str
     distance: Optional[float] = Field(default=None)
     elevation : Optional[float] = Field(default=None)
