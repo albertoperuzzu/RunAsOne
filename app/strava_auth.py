@@ -39,6 +39,8 @@ async def callback(
 ):
     code = request.query_params.get("code")
     state = request.query_params.get("state")
+    print("CODE RECEIVED:", code)
+    print("STATE RECEIVED:", state)
 
     if not state:
         raise HTTPException(status_code=400, detail="Missing state parameter")
