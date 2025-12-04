@@ -9,6 +9,8 @@ from app.auth_helpers import get_current_user
 from app.database import get_session
 from app.models import User
 from app.utils import verify_token
+import time
+import requests
 
 load_dotenv()
 
@@ -65,12 +67,46 @@ async def callback(
         data = response.json()
         strava_id = data["athlete"]["id"]
         access_token = data["access_token"]
+        refresh_token = data["refresh_token"]
+        expires_at = data["expires_at"]
 
     user.strava_id = strava_id
     user.strava_access_token = access_token
+    user.strava_refresh_token = refresh_token
+    user.strava_token_expires_at = expires_at
+    user.strava_connected = True
     db.commit()
 
     if os.getenv("RENDER") == "true":
         return RedirectResponse(url="https://runasone.onrender.com/strava-redirect")
 
     return RedirectResponse(url="http://localhost:5173/strava-redirect")
+
+
+def get_valid_strava_token(user, session):
+    now = int(time.time())
+
+    # Token valido
+    if user.strava_token_expires_at and user.strava_token_expires_at > now:
+        return user.strava_access_token
+
+    # Token scaduto
+    response = requests.post(
+        "https://www.strava.com/oauth/token",
+        data={
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "grant_type": "refresh_token",
+            "refresh_token": user.strava_refresh_token,
+        }
+    ).json()
+
+    # Aggiorna DB
+    user.strava_access_token = response["access_token"]
+    user.strava_refresh_token = response["refresh_token"]
+    user.strava_token_expires_at = response["expires_at"]
+    
+    session.add(user)
+    session.commit()
+
+    return user.strava_access_token

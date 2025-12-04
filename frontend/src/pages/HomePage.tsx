@@ -13,11 +13,10 @@ function HomePage() {
   const [pendingInvites, setPendingInvites] = useState([]);
   const [loadingInvites, setLoadingInvites] = useState(true);
   const navigate = useNavigate();
-  const { nickname } = getUserInfo();
+  const { nickname, strava_connected } = getUserInfo();
 
   useEffect(() => {
-    const connected = localStorage.getItem("strava_connected") === "true";
-    setIsStravaConnected(connected);
+    setIsStravaConnected(strava_connected);
 
     const token = localStorage.getItem("token");
     if (token) {
@@ -34,13 +33,14 @@ function HomePage() {
         .catch(() => setLoadingInvites(false));
     }
 
-  }, []);
+  }, [strava_connected]);
 
   function getUserInfo() {
-    const { nickname, profile_img_url } = useUser();
+    const { nickname, profile_img_url, strava_connected } = useUser();
     return {
       nickname,
       profile_img_url,
+      strava_connected
     };
   }
 

@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import LeaderBox from "../components/LeaderBox";
-import ActivityCard from "../components/ActivityCard";
+import TeamActivityCard from "../components/TeamActivityCard";
 import { HomeIcon, UsersIcon, ActivityIcon } from "lucide-react"; // Usa lucide o FontAwesome
 import API_BASE_URL from "../config";
 
@@ -17,7 +17,15 @@ type Activity = {
   id: number;
   name: string;
   distance: number;
+  elevation?: number;
+  avg_speed?: number;
+  activity_type?: string;
+  date: string;
   summary_polyline?: string;
+  user: {
+    username: string;
+    profile_img_url?: string;
+  };
 };
 
 type Team = {
@@ -117,9 +125,9 @@ export default function TeamSelected() {
     <div className="flex flex-col min-h-screen pb-20">
       <Navbar />
 
-      <div className="flex-grow px-6">
+      <div className="flex-grow px-6 pt-8 pb-4">
         {selectedTab === "home" && (
-          <div className="text-center">
+          <div className="text-center mt-4">
             <img
               src={`${API_BASE_URL}/uploads/${team.image_url}`}
               alt={team.name}
@@ -178,7 +186,7 @@ export default function TeamSelected() {
 
         {selectedTab === "members" && (
           <div>
-            <h2 className="text-xl font-semibold my-4 text-center">Membri del team</h2>
+            <h2 className="text-xl font-semibold mb-6 text-center">Membri del team</h2>
             <ul className="divide-y divide-gray-200">
               {team.members.map((member) => (
                 <li key={member.id} className="py-2 flex items-center justify-between">
@@ -234,12 +242,12 @@ export default function TeamSelected() {
         )}
 
         {selectedTab === "activities" && (
-          <div className="text-center mt-10">
-            <h2 className="text-xl font-semibold">Attività del team</h2>
-            <ul className="space-y-2">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold mb-6">Attività del team</h2>
+            <ul className="space-y-4">
               {team.activities.map((act) => (
                 <li key={act.id}>
-                  <ActivityCard activity={act} />
+                  <TeamActivityCard activity={act} />
                 </li>
               ))}
             </ul>

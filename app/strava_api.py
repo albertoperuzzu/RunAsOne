@@ -8,6 +8,7 @@ import gpxpy.gpx
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session
 from app.auth_helpers import get_current_user
+from app.strava_auth import get_valid_strava_token
 
 router = APIRouter()
 
@@ -17,7 +18,7 @@ async def sync_activities(
     db: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    access_token = current_user.strava_access_token
+    access_token = get_valid_strava_token(current_user, db)
     user_id = current_user.id
     print(f"access token : {access_token}, user id : {user_id}")
     if not access_token:
@@ -39,8 +40,12 @@ async def sync_activities(
 
 
 @router.get("/{activity_id}/export_gpx")
-async def export_gpx(activity_id: int, current_user: User = Depends(get_current_user)):
-    access_token = current_user.strava_access_token
+async def export_gpx(
+        activity_id: int, 
+        db: Session = Depends(get_session),
+        current_user: User = Depends(get_current_user)
+    ):
+    access_token = get_valid_strava_token(current_user, db)
     if not access_token:
         raise HTTPException(status_code=401, detail="User not authenticated")
 

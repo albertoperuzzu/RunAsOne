@@ -77,6 +77,7 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
         "token_type": "bearer",
         "nickname": user.name,
         "profile_img_url": user.profile_img_url,
+        "strava_connected": user.strava_connected
     }
 
 

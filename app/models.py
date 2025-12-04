@@ -49,6 +49,9 @@ class User(SQLModel, table=True):
     hashed_password: str
     strava_id: Optional[int] = Field(index=True) 
     strava_access_token: Optional[str] = Field(default=None, repr=False)
+    strava_refresh_token: Optional[str] = Field(default=None, repr=False)
+    strava_token_expires_at: Optional[int] = Field(default=None, repr=False)
+    strava_connected: bool = Field(default=False)
     profile_img_url: Optional[str] = Field(nullable=False, default="/public/default_user_img.jpg")
     activities: List[Activity] = Relationship(back_populates="user")
     teams: List["Team"] = Relationship(back_populates="members", link_model=UserTeamLink)

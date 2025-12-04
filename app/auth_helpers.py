@@ -4,9 +4,13 @@ from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 from app.models import User
 from app.database import get_session
+import os
+from dotenv import load_dotenv
 
-SECRET_KEY = "supersegreto"
-ALGORITHM = "HS256"
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 def get_current_user(

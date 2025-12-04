@@ -95,7 +95,10 @@ def get_team(
                     "name": a.name,
                     "distance": a.distance,
                     "summary_polyline": a.summary_polyline,
-                    "date": a.date
+                    "date": a.date,
+                    "elevation": a.elevation,
+                    "avg_speed": a.avg_speed,
+                    "activity_type": a.activity_type
                 })
 
     activities.sort(key=lambda x: x["date"], reverse=True)

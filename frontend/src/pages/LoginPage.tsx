@@ -28,7 +28,7 @@ export default function LoginPage() {
 
       if (res.ok) {
         login(data.access_token);
-        setUserData(data.nickname, data.profile_img_url);
+        setUserData(data.nickname, data.profile_img_url, data.strava_connected);
         navigate("/home");
       } else {
         console.error("Errore di login:", data);
