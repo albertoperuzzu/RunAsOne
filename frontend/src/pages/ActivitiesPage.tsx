@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Button from "../components/Button";
 import { RefreshCcw } from "lucide-react";
 import API_BASE_URL from "../config";
+import { useAuth } from "../context/AuthContext";
 
 type Activity = {
   id: number;
@@ -15,7 +16,7 @@ export default function AttivitiesPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const token = localStorage.getItem("token");
+  const { token } = useAuth();
 
   const fetchActivities = async () => {
     setLoading(true);

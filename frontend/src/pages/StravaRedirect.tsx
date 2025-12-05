@@ -8,7 +8,6 @@ function StravaRedirect() {
     const checkStravaAuth = async () => {
       try {
         await new Promise(resolve => setTimeout(resolve, 1000));
-        localStorage.setItem("strava_connected", "true");
         navigate("/activities", { replace: true });
       } catch (err) {
         console.error("Errore nel redirect da Strava:", err);

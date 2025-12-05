@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Button from "../components/Button";
 import API_BASE_URL from "../config";
+import { useAuth } from "../context/AuthContext";
 
 type Team = {
   id: number;
@@ -14,7 +15,7 @@ type Team = {
 export default function TeamPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const token = localStorage.getItem("token");
+  const { token } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {

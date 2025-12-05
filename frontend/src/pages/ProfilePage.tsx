@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import { Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../config";
+import { useAuth } from "../context/AuthContext";
 
 type User = {
     id: number;
@@ -15,7 +16,7 @@ type User = {
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
-  const token = localStorage.getItem("token");
+  const { token } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export default function ProfilePage() {
       <h1 className="text-2xl font-bold text-center mb-4">Il tuo profilo</h1>
       {user && (
         <div className="bg-white rounded-xl shadow p-4 space-y-4">
-            {/* Foto profilo */}
+
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                     <img
@@ -62,7 +63,6 @@ export default function ProfilePage() {
                 <button onClick={() => navigate("/edit-profile?field=image")}><Pencil size={18} /></button>
             </div>
 
-            {/* Email */}
             <div className="flex justify-between items-center">
                 <div className="text-sm">
                     <div className="text-gray-500">Email</div>
@@ -71,7 +71,6 @@ export default function ProfilePage() {
                 <button onClick={() => navigate("/edit-profile?field=email")}><Pencil size={18} /></button>
             </div>
 
-            {/* Nome */}
             <div className="flex justify-between items-center">
                 <div className="text-sm">
                     <div className="text-gray-500">Nome</div>
@@ -80,7 +79,6 @@ export default function ProfilePage() {
                 <button onClick={() => navigate("/edit-profile?field=name")}><Pencil size={18} /></button>
             </div>
 
-            {/* Password */}
             <div className="flex justify-between items-center">
                 <div className="text-sm">
                     <div className="text-gray-500">Password</div>
@@ -89,7 +87,6 @@ export default function ProfilePage() {
                 <button onClick={() => navigate("/edit-profile?field=pwd")}><Pencil size={18} /></button>
             </div>
 
-            {/* Stats */}
             <div className="grid grid-cols-2 text-center text-sm mt-4 border-t pt-4">
             <div>
                 <div className="text-gray-500">Attività</div>

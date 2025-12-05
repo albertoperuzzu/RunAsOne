@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import LeaderBox from "../components/LeaderBox";
 import TeamActivityCard from "../components/TeamActivityCard";
-import { HomeIcon, UsersIcon, ActivityIcon } from "lucide-react"; // Usa lucide o FontAwesome
+import { HomeIcon, UsersIcon, ActivityIcon } from "lucide-react";
 import API_BASE_URL from "../config";
+import { useAuth } from "../context/AuthContext";
 
 type Member = {
   id: number;
@@ -43,6 +44,7 @@ export default function TeamSelected() {
   const [selectedTab, setSelectedTab] = useState<"home" | "members" | "activities">("home");
   const [emailToInvite, setEmailToInvite] = useState("");
   const [inviteMessage, setInviteMessage] = useState("");
+  const { token } = useAuth();
   const [stats, setStats] = useState<{
     total_distance_km: number;
     total_elevation_m: number;
@@ -55,7 +57,6 @@ export default function TeamSelected() {
   } | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
     fetch(`${API_BASE_URL}/db/teams/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -69,7 +70,6 @@ export default function TeamSelected() {
   }, [id]);
 
   useEffect(() => {
-  const token = localStorage.getItem("token");
   fetch(`${API_BASE_URL}/db/teams/${id}/stats`, {
     headers: { Authorization: `Bearer ${token}` },
   })
@@ -79,7 +79,6 @@ export default function TeamSelected() {
 }, [id]);
 
   const handleInvite = async () => {
-    const token = localStorage.getItem("token");
     try {
       const res = await fetch(`${API_BASE_URL}/handle_invites/teams/${id}/invite`, {
         method: "POST",
@@ -100,7 +99,6 @@ export default function TeamSelected() {
   };
 
   const handleRemoveMember = async (userId: number) => {
-    const token = localStorage.getItem("token");
     const res = await fetch(
       `${API_BASE_URL}/handle_invites/${id}/remove_member/${userId}`,
       {

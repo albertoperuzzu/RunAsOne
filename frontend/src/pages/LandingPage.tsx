@@ -5,7 +5,6 @@ import Footer from "../components/Footer";
 
 function LandingPage() {
   const navigate = useNavigate();
-  localStorage.removeItem("strava_connected");
   return (
     <div className="flex flex-col items-center justify-center h-screen text-gray-800">
       <img

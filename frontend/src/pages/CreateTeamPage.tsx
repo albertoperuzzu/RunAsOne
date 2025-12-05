@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../config";
+import { useAuth } from "../context/AuthContext";
 
 export default function CreateTeamPage() {
   const [name, setName] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const { token } = useAuth();
 
   const handleCreateTeam = async () => {
     if (!name || !image) {

@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import API_BASE_URL from "../config";
+import { useAuth } from "../context/AuthContext";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -12,9 +13,9 @@ export default function EditProfile() {
   const field = query.get("field");
 
   const [user, setUser] = useState<any>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
     fetch(`${API_BASE_URL}/db/getUserInfo`, {
       headers: {
         Authorization: `Bearer ${token}`,

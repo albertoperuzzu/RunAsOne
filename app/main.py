@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Response, status, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from sqlmodel import select
 from app.models import User, UserCreate
 from app.utils import hash_password, verify_password
@@ -15,7 +16,7 @@ from app.db_search import UPLOAD_DIR
 from sqlalchemy.orm import Session
 from jose import jwt
 import os
-from app.auth_helpers import SECRET_KEY, ALGORITHM
+from app.auth_helpers import create_access_token, create_refresh_token, verify_token, is_refresh_token, REFRESH_TOKEN_EXPIRE_DAYS
 import logging
 
 app = FastAPI(debug=True)
@@ -71,14 +72,112 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
     user = db.exec(select(User).where(User.email == form.username)).first()
     if not user or verify_password(form.password, user.hashed_password) is False:
         raise HTTPException(status_code=401, detail="Credenziali errate")
-    token = jwt.encode({"user_id": user.id}, SECRET_KEY, algorithm=ALGORITHM)
-    return {
-        "access_token": token,
+
+    access_token = create_access_token({"user_id": user.id})
+    refresh_token = create_refresh_token({"user_id": user.id})
+
+    response_body = {
+        "access_token": access_token,
         "token_type": "bearer",
         "nickname": user.name,
         "profile_img_url": user.profile_img_url,
-        "strava_connected": user.strava_connected
+        "strava_connected": bool(user.strava_access_token)
     }
+
+    response = JSONResponse(content=response_body)
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=os.getenv("RENDER") == "true",
+        samesite="lax",
+        max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+        path="/"
+    )
+
+    return response
+
+
+@app.get("/me")
+def me(
+    authorization: str | None = None,
+    refresh_token: str | None = Cookie(default=None),
+    db = Depends(get_session)
+):
+    user_id = None
+
+    # Tenta con access token
+    if authorization:
+        scheme, _, token = authorization.partition(" ")
+        if scheme.lower() == "bearer" and token:
+            try:
+                payload = verify_token(token)
+                user_id = payload.get("user_id")
+            except Exception:
+                # token scaduto
+                pass
+
+    # Access token non valido -> tenta refresh token
+    if not user_id and refresh_token:
+        try:
+            payload = verify_token(refresh_token)
+            if not is_refresh_token(payload):
+                raise Exception("Invalid refresh token")
+            user_id = payload.get("user_id")
+        except Exception:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+    # Nessun token valido
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    user = db.exec(select(User).where(User.id == user_id)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Se è entrato tramite refresh token, genera un nuovo access token
+    new_access_token = None
+    if authorization is None: 
+        new_access_token = create_access_token({"user_id": user_id})
+
+    return {
+        "user_id": user.id,
+        "email": user.email,
+        "nickname": user.name,
+        "profile_img_url": user.profile_img_url,
+        "strava_connected": bool(user.strava_access_token),
+        "new_access_token": new_access_token
+    }
+
+
+@app.post("/refresh")
+def refresh_token_endpoint(refresh_token: str | None = Cookie(default=None), db_session: Session = Depends(get_session)):
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="Missing refresh token")
+    try:
+        payload = verify_token(refresh_token)
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    if not is_refresh_token(payload):
+        raise HTTPException(status_code=401, detail="Invalid token type")
+
+    user_id = payload.get("user_id")
+    # controlla che l'utente esista:
+    user = db_session.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    new_access = create_access_token({"user_id": user_id})
+    return {"access_token": new_access, "token_type": "bearer", "nickname": user.name, "profile_img_url": user.profile_img_url, "strava_connected": bool(user.strava_access_token)}
+
+
+@app.post("/logout")
+def logout():
+    resp = JSONResponse(content={"msg": "logged out"})
+    resp.delete_cookie("refresh_token", path="/")
+    return resp
 
 
 app.include_router(auth_router, prefix="")
@@ -97,7 +196,6 @@ if os.getenv("RENDER") == "true":
     frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
     public_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "public")
 
-    # app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dir, "assets")), name="assets")
     app.mount("/public", StaticFiles(directory=public_dir), name="public")
 

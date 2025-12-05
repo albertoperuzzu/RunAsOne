@@ -1,16 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useUser } from "../context/UserContext";
 import API_BASE_URL from "../config";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { login } = useAuth();
-  const { setUserData } = useUser();
 
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -18,6 +16,7 @@ export default function LoginPage() {
       const res = await fetch(`${API_BASE_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        credentials: "include",
         body: new URLSearchParams({
           username: email,
           password: password
@@ -27,16 +26,18 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        login(data.access_token);
-        setUserData(data.nickname, data.profile_img_url, data.strava_connected);
+        login(data.access_token, {
+          nickname: data.nickname,
+          profile_img_url: data.profile_img_url,
+          strava_connected: data.strava_connected
+        });
+
         navigate("/home");
       } else {
-        console.error("Errore di login:", data);
         setErrorMessage(data.detail || "Errore nel login.");
       }
     } catch (error) {
       setErrorMessage("Errore di rete o del server.");
-      console.error("Login error:", error);
     }
   };
 
@@ -71,6 +72,7 @@ export default function LoginPage() {
         >
           Accedi
         </button>
+
         <div className="mt-10 text-center">
           <p className="text-sm text-gray-700 mb-2">Non hai ancora un account?</p>
           <button

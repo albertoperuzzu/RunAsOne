@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../config";
+import { useAuth } from "../context/AuthContext";
 
 type Invite = {
   id: number;
@@ -15,10 +16,9 @@ export default function InvitesPage() {
   const [invites, setInvites] = useState<Invite[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { token } = useAuth();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
     fetch(`${API_BASE_URL}/handle_invites/check_invites`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -31,8 +31,6 @@ export default function InvitesPage() {
   }, []);
 
   const acceptInvite = async (inviteId: number) => {
-    const token = localStorage.getItem("token");
-
     const res = await fetch(`${API_BASE_URL}/handle_invites/invites/${inviteId}/accept`, {
       method: "POST",
       headers: {
@@ -49,7 +47,6 @@ export default function InvitesPage() {
   };
 
   const rejectInvite = async (inviteId: number) => {
-    const token = localStorage.getItem("token");
 
     const res = await fetch(`${API_BASE_URL}/handle_invites/invites/${inviteId}/reject`, {
       method: "DELETE",
