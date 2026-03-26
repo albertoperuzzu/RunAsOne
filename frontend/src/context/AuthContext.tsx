@@ -4,7 +4,7 @@ import API_BASE_URL from "../config";
 type User = {
   nickname: string;
   profile_img_url: string | null;
-  strava_connected: boolean;
+  garmin_connected: boolean;
 };
 
 type AuthContextType = {
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser({
             nickname: data.nickname,
             profile_img_url: data.profile_img_url,
-            strava_connected: data.strava_connected,
+            garmin_connected: data.garmin_connected,
           });
 
           setIsAuthenticated(true);

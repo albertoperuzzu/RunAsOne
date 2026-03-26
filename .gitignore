@@ -20,3 +20,6 @@ venv/
 
 # node
 node_modules/
+
+#claude
+.claude/

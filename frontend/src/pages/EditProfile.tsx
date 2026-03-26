@@ -35,7 +35,6 @@ export default function EditProfile() {
       alert("Il campo Nome non può essere vuoto!");
       return;
     }
-    const token = localStorage.getItem("token");
     try {
       const res = await fetch(`${API_BASE_URL}/handle_profile/update_name`, {
         method: "PUT",
@@ -62,7 +61,6 @@ export default function EditProfile() {
       alert("Il campo Email non può essere vuoto!");
       return;
     }
-    const token = localStorage.getItem("token");
     try {
       const res = await fetch(`${API_BASE_URL}/handle_profile/update_email`, {
         method: "PUT",
@@ -91,7 +89,6 @@ export default function EditProfile() {
       alert("I campi non possono essere vuoti!");
       return;
     }
-    const token = localStorage.getItem("token");
     try {
       const res = await fetch(`${API_BASE_URL}/handle_profile/update_password`, {
         method: "PUT",
@@ -118,7 +115,6 @@ export default function EditProfile() {
       alert("Seleziona un file.");
       return;
     }
-    const token = localStorage.getItem("token");
     const formData = new FormData();
     formData.append("file", file);
     try {

@@ -13,7 +13,7 @@ function HomePage() {
   const [loadingInvites, setLoadingInvites] = useState(true);
   const navigate = useNavigate();
 
-  const { nickname, strava_connected } = useUser();
+  const { nickname, garmin_connected } = useUser();
   const { token, isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -33,11 +33,6 @@ function HomePage() {
       .catch(() => setLoadingInvites(false));
   }, [isAuthenticated, token]);
 
-  const handleStravaLogin = () => {
-    if (!token) return;
-    window.location.href = `${API_BASE_URL}/strava_login?token=${token}`;
-  };
-
   return (
     <div className="min-h-screen text-gray-800">
       <Navbar />
@@ -50,10 +45,10 @@ function HomePage() {
           className="w-40 h-40 mb-8"
         />
 
-        {!strava_connected ? (
+        {!garmin_connected ? (
           <div className="flex flex-col items-center space-y-4">
-            <Button variant="strava" onClick={handleStravaLogin}>
-              Connetti a Strava
+            <Button variant="garmin" onClick={() => navigate("/garmin-connect")}>
+              Connetti a Garmin
             </Button>
 
             <Button variant="primary" onClick={() => navigate("/teams")}>

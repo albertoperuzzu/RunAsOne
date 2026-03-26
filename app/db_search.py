@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, Form
+from datetime import date, datetime, time
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, Form
 from fastapi.responses import JSONResponse
 from app.database import get_session
-from app.models import User, Team, UserTeamLink, Activity
+from typing import List, Optional
+from app.models import User, Team, UserTeamLink, Activity, TeamEvent
 from app.custom_beans import TeamStatsResponse
 from sqlmodel import Session, select
 from app.auth_helpers import get_current_user
@@ -203,3 +205,68 @@ def get_my_teams(
         "teams_count": len(user.teams)
     }
     return result
+
+
+@router.post("/teams/{team_id}/create_event", response_model=TeamEvent)
+async def create_event(
+    team_id: int,
+    date: date = Form(...),
+    hour: time = Form(...),
+    name: str = Form(...),
+    description: str = Form(...),
+    start_place: str = Form(...),
+    end_place: Optional[str] = Form(None),
+    event_type: Optional[str] = Form(None),
+    image: Optional[UploadFile] = File(None),
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    team = session.get(Team, team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team non trovato")
+
+    if current_user not in team.members:
+        raise HTTPException(status_code=403, detail="Non appartieni a questo team")
+
+    img_url = "/public/default_event_img.jpg"
+
+    if image:
+        file_location = f"public/event_images/{team_id}_{image.filename}"
+        with open(file_location, "wb") as f:
+            f.write(await image.read())
+        img_url = "/" + file_location
+
+    new_event = TeamEvent(
+        team_id=team_id,
+        creator_id=current_user.id,
+        date=date,
+        hour=hour,
+        name=name,
+        description=description,
+        start_place=start_place,
+        end_place=end_place,
+        event_type=event_type,
+        event_img_url=img_url
+    )
+
+    session.add(new_event)
+    session.commit()
+    session.refresh(new_event)
+
+    return new_event
+
+
+@router.get("/teams/{team_id}/events", response_model=List[TeamEvent])
+def list_team_events(team_id: int, session: Session = Depends(get_session)):
+    events = session.exec(
+        select(TeamEvent).where(TeamEvent.team_id == team_id)
+    ).all()
+
+    now = datetime.now()
+
+    future_events = [
+        e for e in events
+        if datetime.combine(e.date, e.hour) >= now
+    ]
+
+    return future_events

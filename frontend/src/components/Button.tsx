@@ -1,7 +1,7 @@
 type ButtonProps = {
   children: React.ReactNode;
   onClick?: () => void;
-  variant?: "primary" | "secondary" | "strava" | "syncStrava";
+  variant?: "primary" | "secondary" | "garmin" | "syncGarmin";
 };
 
 export default function Button({
@@ -11,8 +11,8 @@ export default function Button({
 }: ButtonProps) {
   const base = "font-semibold px-4 py-2 rounded-md transition";
   const variants = {
-    strava: "bg-strava text-white mb-2 hover:bg-strava/90",
-    syncStrava: "bg-strava text-white text-sm px-2 py-1 hover:bg-strava/90",
+    garmin: "bg-garmin text-white mb-2 hover:bg-garmin/90",
+    syncGarmin: "bg-garmin text-white text-sm px-2 py-1 hover:bg-garmin/90",
     primary: "bg-magenta w-40 mt-2 text-white hover:bg-magenta/90",
     secondary: "bg-white w-40 mt-2 text-primary hover:bg-secondary",
   };

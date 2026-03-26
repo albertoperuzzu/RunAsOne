@@ -13,11 +13,11 @@ def get_user_activities(user_id: int, db: Session):
     ).all()
 
 
-def get_activity_by_strava_id(user_id: int, strava_id: int, db: Session):
+def get_activity_by_garmin_id(user_id: int, garmin_id: int, db: Session):
     return db.exec(
         select(Activity).where(
             Activity.user_id == user_id,
-            Activity.strava_id == strava_id
+            Activity.garmin_id == garmin_id
         )
     ).first()
 
@@ -34,39 +34,55 @@ def get_month_range():
 
 def save_activities(filtered: list, user_id: int, db: Session):
     for act in filtered:
-        strava_id = act["id"]
+        garmin_id = act.get("activityId")
+        if not garmin_id:
+            continue
         try:
             existing = db.exec(
                 select(Activity).where(
-                    Activity.strava_id == strava_id,
+                    Activity.garmin_id == garmin_id,
                     Activity.user_id == user_id
                 )
             ).first()
         except Exception as e:
-            print(f"Error in Query for activity {strava_id} : {e}")
-        print(f"ACT ID : {existing}")
+            print(f"Error in Query for activity {garmin_id} : {e}")
+            continue
+        poly = act.get("_polyline")
         if not existing:
             try:
-                print(f"DATA 1"),
+                start_lat = act.get("startLatitude")
+                start_lng = act.get("startLongitude")
+                end_lat = act.get("endLatitude")
+                end_lng = act.get("endLongitude")
+
+                date_str = act.get("startTimeLocal", "")
+                try:
+                    activity_date = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+                except ValueError:
+                    activity_date = datetime.strptime(date_str[:19], "%Y-%m-%dT%H:%M:%S")
+
                 new_activity = Activity(
-                    strava_id = strava_id,
-                    name = act["name"],
-                    distance = act["distance"],
-                    user_id = user_id,
-                    elevation = act["total_elevation_gain"],
-                    activity_type = act["type"],
-                    date = datetime.strptime(act["start_date_local"], '%Y-%m-%dT%H:%M:%SZ'),
-                    start_act = act["start_latlng"],
-                    end_act = act["end_latlng"],
-                    summary_polyline = act["map"]["summary_polyline"],
-                    avg_speed = act["average_speed"],
-                    max_speed = act["max_speed"],
-                    elev_high = act["elev_high"]
+                    garmin_id=garmin_id,
+                    name=act.get("activityName", "Attività"),
+                    distance=act.get("distance", 0),
+                    user_id=user_id,
+                    elevation=act.get("elevationGain", 0),
+                    activity_type=act.get("activityType", {}).get("typeKey", "running"),
+                    date=activity_date,
+                    start_act=[start_lat, start_lng] if start_lat is not None and start_lng is not None else None,
+                    end_act=[end_lat, end_lng] if end_lat is not None and end_lng is not None else None,
+                    summary_polyline=poly,
+                    avg_speed=act.get("averageSpeed"),
+                    max_speed=act.get("maxSpeed"),
+                    elev_high=act.get("maxElevation"),
                 )
                 db.add(new_activity)
             except Exception as e:
                 print(f"Errore durante la creazione dell'attività: {e}")
-    try: 
+        elif poly and not existing.summary_polyline:
+            existing.summary_polyline = poly
+            db.add(existing)
+    try:
         db.commit()
     except Exception as e:
         print(f"Error in Commit to DB : {e}")

@@ -7,8 +7,8 @@ from app.models import User, UserCreate
 from app.utils import hash_password, verify_password
 from app.database import engine, create_db_and_tables, get_session
 from fastapi.middleware.cors import CORSMiddleware
-from app.strava_auth import router as auth_router
-from app.strava_api import router as strava_router
+from app.garmin_auth import router as garmin_auth_router
+from app.garmin_api import router as garmin_router
 from app.db_search import router as db_router
 from app.invites import router as invites_router
 from app.profile import router as profile_router
@@ -81,7 +81,7 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
         "token_type": "bearer",
         "nickname": user.name,
         "profile_img_url": user.profile_img_url,
-        "strava_connected": bool(user.strava_access_token)
+        "garmin_connected": bool(user.garmin_connected)
     }
 
     response = JSONResponse(content=response_body)
@@ -146,7 +146,7 @@ def me(
         "email": user.email,
         "nickname": user.name,
         "profile_img_url": user.profile_img_url,
-        "strava_connected": bool(user.strava_access_token),
+        "garmin_connected": bool(user.garmin_connected),
         "new_access_token": new_access_token
     }
 
@@ -170,7 +170,7 @@ def refresh_token_endpoint(refresh_token: str | None = Cookie(default=None), db_
         raise HTTPException(status_code=404, detail="User not found")
 
     new_access = create_access_token({"user_id": user_id})
-    return {"access_token": new_access, "token_type": "bearer", "nickname": user.name, "profile_img_url": user.profile_img_url, "strava_connected": bool(user.strava_access_token)}
+    return {"access_token": new_access, "token_type": "bearer", "nickname": user.name, "profile_img_url": user.profile_img_url, "garmin_connected": bool(user.garmin_connected)}
 
 
 @app.post("/logout")
@@ -180,8 +180,8 @@ def logout():
     return resp
 
 
-app.include_router(auth_router, prefix="")
-app.include_router(strava_router, prefix="/strava_api")
+app.include_router(garmin_auth_router, prefix="/garmin")
+app.include_router(garmin_router, prefix="/garmin_api")
 app.include_router(db_router, prefix="/db")
 app.include_router(invites_router, prefix="/handle_invites")
 app.include_router(profile_router, prefix="/handle_profile")

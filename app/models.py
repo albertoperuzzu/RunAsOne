@@ -4,15 +4,18 @@ from sqlalchemy import Column, JSON, BigInteger
 from sqlalchemy.dialects.postgresql import JSONB
 from typing import Optional, List
 from datetime import datetime
+from datetime import time as TimeType
+from datetime import date as DateType
 
 if os.environ.get("DATABASE_URL", "").startswith("postgres"):
     JsonType = JSONB
 else:
     JsonType = JSON
 
+
 class Activity(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    strava_id: int = Field(sa_column=Column(BigInteger, nullable=False, index=True))
+    garmin_id: int = Field(sa_column=Column(BigInteger, nullable=False, index=True))
     name: str
     distance: Optional[float] = Field(default=None)
     elevation : Optional[float] = Field(default=None)
@@ -25,7 +28,7 @@ class Activity(SQLModel, table=True):
     avg_speed : Optional[float] = Field(default=None)
     max_speed : Optional[float] = Field(default=None)
     elev_high : Optional[float] = Field(default=None)
-    __table_args__ = (UniqueConstraint("strava_id", "user_id"),)
+    __table_args__ = (UniqueConstraint("garmin_id", "user_id"),)
     user: Optional["User"] = Relationship(back_populates="activities")
 
 
@@ -40,6 +43,7 @@ class Team(SQLModel, table=True):
     name: str = Field(nullable=False, unique=True)
     image_url: Optional[str] = Field(default=None)
     members: List["User"] = Relationship(back_populates="teams", link_model=UserTeamLink)
+    events: List["TeamEvent"] = Relationship(back_populates="team")
 
 
 class User(SQLModel, table=True):
@@ -47,19 +51,18 @@ class User(SQLModel, table=True):
     name: str
     email: str = Field(index=True, nullable=False, unique=True)
     hashed_password: str
-    strava_id: Optional[int] = Field(index=True) 
-    strava_access_token: Optional[str] = Field(default=None, repr=False)
-    strava_refresh_token: Optional[str] = Field(default=None, repr=False)
-    strava_token_expires_at: Optional[int] = Field(default=None, repr=False)
-    strava_connected: bool = Field(default=False)
+    garmin_connected: bool = Field(default=False)
+    garmin_session_data: Optional[str] = Field(default=None, repr=False)
     profile_img_url: Optional[str] = Field(nullable=False, default="/public/default_user_img.jpg")
     activities: List[Activity] = Relationship(back_populates="user")
     teams: List["Team"] = Relationship(back_populates="members", link_model=UserTeamLink)
+
 
 class UserCreate(SQLModel):
     email: str
     name: str
     password: str
+
 
 class TeamInvite(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -68,3 +71,18 @@ class TeamInvite(SQLModel, table=True):
     accepted: bool = Field(default=False)
     team: Optional["Team"] = Relationship()
     user: Optional["User"] = Relationship()
+
+
+class TeamEvent(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    team_id: int = Field(foreign_key="team.id")
+    creator_id: int = Field(foreign_key="user.id")
+    date: DateType = Field(nullable=False)
+    hour: TimeType = Field(nullable=False)
+    name: str = Field(nullable=False)
+    description: str = Field(nullable=False)
+    start_place: str = Field(nullable=False)
+    end_place: Optional[str] = None
+    event_type: Optional[str] = None
+    event_img_url: Optional[str] = Field(default="/public/default_event_img.jpg")
+    team: Optional["Team"] = Relationship(back_populates="events")

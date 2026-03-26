@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import LeaderBox from "../components/LeaderBox";
 import TeamActivityCard from "../components/TeamActivityCard";
-import { HomeIcon, UsersIcon, ActivityIcon } from "lucide-react";
+import { HomeIcon, UsersIcon, ActivityIcon, CalendarIcon } from "lucide-react";
 import API_BASE_URL from "../config";
 import { useAuth } from "../context/AuthContext";
 
@@ -38,12 +38,20 @@ type Team = {
   activities: Activity[];
 };
 
+type Event = {
+  id: number;
+  title: string;
+  date: string;
+  description: string;
+};
+
 export default function TeamSelected() {
   const { id } = useParams<{ id: string }>();
   const [team, setTeam] = useState<Team | null>(null);
-  const [selectedTab, setSelectedTab] = useState<"home" | "members" | "activities">("home");
+  const [selectedTab, setSelectedTab] = useState<"home" | "members" | "activities" | "events">("home");
   const [emailToInvite, setEmailToInvite] = useState("");
   const [inviteMessage, setInviteMessage] = useState("");
+  const [events, setEvents] = useState<Event[]>([]);
   const { token } = useAuth();
   const [stats, setStats] = useState<{
     total_distance_km: number;
@@ -70,13 +78,22 @@ export default function TeamSelected() {
   }, [id]);
 
   useEffect(() => {
-  fetch(`${API_BASE_URL}/db/teams/${id}/stats`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
-    .then((res) => res.json())
-    .then(setStats)
-    .catch((err) => console.error("Errore nel caricamento statistiche", err));
-}, [id]);
+    fetch(`${API_BASE_URL}/db/teams/${id}/stats`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then(setStats)
+      .catch((err) => console.error("Errore nel caricamento statistiche", err));
+  }, [id]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/events/teams/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then(setEvents)
+      .catch((err) => console.error("Errore nel caricamento eventi", err));
+  }, [id]);
 
   const handleInvite = async () => {
     try {
@@ -251,6 +268,35 @@ export default function TeamSelected() {
             </ul>
           </div>
         )}
+
+        {selectedTab === "events" && (
+          <div className="text-center">
+            <h2 className="text-xl font-semibold mb-6">Eventi del team</h2>
+
+            <ul className="space-y-4">
+              {events.length > 0 ? (
+                events.map((event) => (
+                  <li key={event.id} className="p-4 border rounded shadow-sm">
+                    <p className="text-lg font-semibold">{event.title}</p>
+                    <p className="text-sm text-gray-600">{event.date}</p>
+                    <p className="mt-2">{event.description}</p>
+                  </li>
+                ))
+              ) : (
+                <p className="text-gray-500">Nessun evento disponibile.</p>
+              )}
+            </ul>
+
+            {/* Bottone per creare evento */}
+            <button
+              className="mt-6 bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700"
+              onClick={() => console.log("Apri creazione evento")}
+            >
+              ➕ Crea nuovo evento
+            </button>
+          </div>
+        )}
+
       </div>
 
       {/* Menu */}
@@ -267,6 +313,10 @@ export default function TeamSelected() {
           <button onClick={() => setSelectedTab("activities")} className="flex flex-col items-center text-sm">
             <ActivityIcon className="w-5 h-5" />
             Attività
+          </button>
+          <button onClick={() => setSelectedTab("events")} className="flex flex-col items-center text-sm">
+            <CalendarIcon className="w-5 h-5" />
+            Eventi
           </button>
         </div>
       </nav>

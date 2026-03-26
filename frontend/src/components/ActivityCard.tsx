@@ -26,7 +26,7 @@ export default function ActivityCard({ activity }: Props) {
       <Button
         variant="primary"
         onClick={() => {
-          const url = `${API_BASE_URL}/strava_api/${activity.id}/export_gpx`;
+          const url = `${API_BASE_URL}/garmin_api/${activity.id}/export_gpx`;
           window.location.href = url;
         }}
       >

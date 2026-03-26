@@ -38,20 +38,20 @@ export default function AttivitiesPage() {
     }
   };
 
-  const syncWithStrava = async () => {
+  const syncWithGarmin = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/strava_api/syncActivities`, {
+      const res = await fetch(`${API_BASE_URL}/garmin_api/syncActivities`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
         }
       });
-      if (!res.ok) throw new Error("Errore durante la sincronizzazione con Strava");
+      if (!res.ok) throw new Error("Errore durante la sincronizzazione con Garmin");
       await fetchActivities();
     } catch (err) {
       console.error(err);
-      setError("Errore durante la sincronizzazione con Strava.");
+      setError("Errore durante la sincronizzazione con Garmin.");
       setLoading(false);
     }
   };
@@ -70,8 +70,8 @@ export default function AttivitiesPage() {
         <div className="flex items-center space-x-4">
           <h1 className="text-2xl font-bold">Le tue attività</h1>
           <Button
-            variant="syncStrava"
-            onClick={syncWithStrava}
+            variant="syncGarmin"
+            onClick={syncWithGarmin}
           >
             <RefreshCcw size={16} className="text-white" />
           </Button>

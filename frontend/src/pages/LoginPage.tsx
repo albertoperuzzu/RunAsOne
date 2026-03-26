@@ -29,7 +29,7 @@ export default function LoginPage() {
         login(data.access_token, {
           nickname: data.nickname,
           profile_img_url: data.profile_img_url,
-          strava_connected: data.strava_connected
+          garmin_connected: data.garmin_connected
         });
 
         navigate("/home");
