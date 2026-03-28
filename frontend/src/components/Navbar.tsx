@@ -14,7 +14,6 @@ export default function Navbar() {
     navigate("/");
   };
 
-  // Chiusura menu cliccando fuori
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -29,60 +28,40 @@ export default function Navbar() {
     <div className="fixed top-4 right-4 z-50" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-magenta p-2 rounded-md text-white shadow-lg"
+        className="glass-dark text-white p-2 rounded-lg shadow-lg"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/20 z-40"
+          className="fixed inset-0 bg-black/30 z-40"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {isOpen && (
-        <ul className="absolute right-0 mt-2 bg-magenta/95 shadow-xl rounded-lg p-4 space-y-2 w-36 text-right transition duration-500 transform scale-100 opacity-100 z-50">
-          <li>
-            <Link
-              to="/home"
-              onClick={() => setIsOpen(false)}
-              className="block hover:underline"
-            >
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/activities"
-              onClick={() => setIsOpen(false)}
-              className="block hover:underline"
-            >
-              Attività
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/teams"
-              onClick={() => setIsOpen(false)}
-              className="block hover:underline"
-            >
-              Teams
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/profile"
-              onClick={() => setIsOpen(false)}
-              className="block hover:underline"
-            >
-              Profilo
-            </Link>
-          </li>
-          <li>
+        <ul className="absolute right-0 mt-2 glass-dark rounded-xl p-4 space-y-3 w-40 text-right z-50">
+          {[
+            { to: "/home", label: "Home" },
+            { to: "/activities", label: "Attività" },
+            { to: "/teams", label: "Teams" },
+            { to: "/profile", label: "Profilo" },
+          ].map(({ to, label }) => (
+            <li key={to}>
+              <Link
+                to={to}
+                onClick={() => setIsOpen(false)}
+                className="block text-white/90 hover:text-white hover:underline font-medium text-sm"
+              >
+                {label}
+              </Link>
+            </li>
+          ))}
+          <li className="border-t border-white/20 pt-2">
             <button
               onClick={handleLogout}
-              className="w-full text-right hover:underline"
+              className="w-full text-right text-accent hover:text-white text-sm font-semibold"
             >
               Logout
             </button>

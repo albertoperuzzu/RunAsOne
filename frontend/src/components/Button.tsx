@@ -2,23 +2,29 @@ type ButtonProps = {
   children: React.ReactNode;
   onClick?: () => void;
   variant?: "primary" | "secondary" | "garmin" | "syncGarmin";
+  disabled?: boolean;
 };
 
 export default function Button({
   children,
   onClick,
   variant = "primary",
+  disabled = false,
 }: ButtonProps) {
-  const base = "font-semibold px-4 py-2 rounded-md transition";
+  const base = "font-semibold px-4 py-2 rounded-lg transition";
   const variants = {
-    garmin: "bg-garmin text-white mb-2 hover:bg-garmin/90",
+    primary:    "btn-gradient w-40 mt-2",
+    secondary:  "border-2 border-accent/70 text-viola bg-white/10 w-40 mt-2 hover:bg-white/20",
+    garmin:     "bg-garmin text-white mb-2 hover:bg-garmin/90",
     syncGarmin: "bg-garmin text-white text-sm px-2 py-1 hover:bg-garmin/90",
-    primary: "bg-magenta w-40 mt-2 text-white hover:bg-magenta/90",
-    secondary: "bg-white w-40 mt-2 text-primary hover:bg-secondary",
   };
 
   return (
-    <button onClick={onClick} className={`${base} ${variants[variant]}`}>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`${base} ${variants[variant]} disabled:opacity-50`}
+    >
       {children}
     </button>
   );

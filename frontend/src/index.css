@@ -4,16 +4,77 @@
   --font-heading: "Inter", sans-serif;
   --breakpoint-3xl: 1920px;
   --color-garmin: #1d9bd6;
-  --color-primary: #0a2342;
-  --color-secondary: #74c0fc;
-  --color-neutral: #ffffff;
-  --color-magenta: #fc466b;
-  --color-viola: #3f5efb;
-  --color-blu: #00bfff;
-  --color-giallo: #ffd700;
-  --color-arancio: #ffa500;
+  --color-brand:  #2d1b69;
+  --color-accent: #e8175d;
+  --color-viola:  #7b2fbe;
+  --color-warm:   #ff6b35;
+  --color-cool:   #00c2e0;
+  --color-indaco: #140a3cb3;
 }
 
+/* ── Global background ───────────────────────────────────── */
+body {
+  min-height: 100vh;
+  background-image: url('/background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* ── Glassmorphism surfaces ──────────────────────────────── */
+.glass {
+  background: rgba(20, 10, 60, 0.70);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.20);
+}
+
+.glass-dark {
+  background: rgba(45, 27, 105, 0.80);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+}
+
+/* ── Form inputs ─────────────────────────────────────────── */
+.glass-input {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  color: #1f2937;
+  outline: none;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.glass-input:focus {
+  border-color: #e8175d;
+  box-shadow: 0 0 0 2px rgba(232, 23, 93, 0.25);
+}
+
+/* ── Gradient button ─────────────────────────────────────── */
+.btn-gradient {
+  background: linear-gradient(135deg, #e8175d, #7b2fbe);
+  color: #ffffff;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.btn-gradient:hover {
+  opacity: 0.88;
+}
+
+.btn-gradient:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Misc ─────────────────────────────────────────────────── */
 .scroll-smooth::-webkit-scrollbar {
   display: none;
 }

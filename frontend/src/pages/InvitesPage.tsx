@@ -7,9 +7,7 @@ import { useAuth } from "../context/AuthContext";
 type Invite = {
   id: number;
   team_id: number;
-  team: {
-    name: string;
-  };
+  team: { name: string };
 };
 
 export default function InvitesPage() {
@@ -20,80 +18,76 @@ export default function InvitesPage() {
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/handle_invites/check_invites`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
       .then(setInvites)
-      .catch((err) => console.error("Errore nel caricamento degli inviti:", err))
+      .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
   const acceptInvite = async (inviteId: number) => {
     const res = await fetch(`${API_BASE_URL}/handle_invites/invites/${inviteId}/accept`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
-
-    if (res.ok) {
-      setInvites((prev) => prev.filter((i) => i.id !== inviteId));
-      navigate("/home"); 
-    } else {
-      alert("Errore nell'accettare l'invito");
-    }
+    if (res.ok) { setInvites((p) => p.filter((i) => i.id !== inviteId)); navigate("/home"); }
+    else alert("Errore nell'accettare l'invito");
   };
 
   const rejectInvite = async (inviteId: number) => {
-
     const res = await fetch(`${API_BASE_URL}/handle_invites/invites/${inviteId}/reject`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
-
-    if (res.ok) {
-      setInvites((prev) => prev.filter((i) => i.id !== inviteId));
-      navigate("/home"); 
-    } else {
-      alert("Errore nel rifiutare l'invito");
-    }
+    if (res.ok) { setInvites((p) => p.filter((i) => i.id !== inviteId)); navigate("/home"); }
+    else alert("Errore nel rifiutare l'invito");
   };
 
-  if (loading) return <p className="text-center mt-8">Caricamento inviti...</p>;
-  if (invites.length === 0) return <p className="text-center mt-8">Nessun invito disponibile</p>;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-white/70">Caricamento inviti...</p>
+    </div>
+  );
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <Navbar/>
-      <h1 className="text-2xl font-bold mb-4 text-center">I tuoi inviti ai team</h1>
-      {invites.map((invite) => (
-        <div
-          key={invite.id}
-          className="border rounded p-4 mb-4 flex justify-between items-center"
-        >
-          <div>
-            <p className="text-lg font-semibold">Team: {invite.team?.name || invite.team_id}</p>
+    <div className="min-h-screen pb-8">
+      <Navbar />
+      <div className="px-4 pt-8 max-w-xl mx-auto">
+        <h1 className="text-white text-2xl font-bold drop-shadow mb-6 text-center">
+          I tuoi inviti
+        </h1>
+
+        {invites.length === 0 ? (
+          <div className="glass rounded-2xl p-8 text-center">
+            <p className="text-white/60">Nessun invito disponibile</p>
           </div>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => acceptInvite(invite.id)}
-              className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-            >
-              Accetta
-            </button>
-            <button
-              onClick={() => rejectInvite(invite.id)}
-              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-            >
-              Rifiuta
-            </button>
-          </div>
-        </div>
-      ))}
+        ) : (
+          <ul className="space-y-4">
+            {invites.map((invite) => (
+              <li key={invite.id} className="glass rounded-xl p-4 flex justify-between items-center">
+                <p className="text-white font-semibold">
+                  {invite.team?.name || `Team #${invite.team_id}`}
+                </p>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => acceptInvite(invite.id)}
+                    className="btn-gradient px-4 py-1 text-sm rounded-lg"
+                  >
+                    Accetta
+                  </button>
+                  <button
+                    onClick={() => rejectInvite(invite.id)}
+                    className="bg-white/10 border border-white/20 text-white/80 px-4 py-1 text-sm rounded-lg hover:bg-red-500/40 transition"
+                  >
+                    Rifiuta
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

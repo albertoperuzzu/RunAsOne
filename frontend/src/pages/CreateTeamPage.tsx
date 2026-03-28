@@ -15,62 +15,55 @@ export default function CreateTeamPage() {
       setError("Inserisci nome e immagine del team");
       return;
     }
-
     const formData = new FormData();
     formData.append("name", name);
     formData.append("image", image);
-
     try {
       const res = await fetch(`${API_BASE_URL}/db/create_team`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: formData
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
       });
-
-      if (!res.ok) throw new Error("Errore nella creazione");
-
+      if (!res.ok) throw new Error();
       navigate("/teams");
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Errore nella creazione del team");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto pt-6">
-      <div className="max-w-md bg-white/70 mx-auto p-6 shadow-md rounded-lg">
-        <h2 className="text-2xl font-bold mb-4">Crea un team</h2>
-        {error && <p className="text-red-600 mb-3">{error}</p>}
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="glass rounded-2xl p-8 w-full max-w-sm">
+        <h2 className="text-white text-2xl font-bold mb-6 text-center">Crea un team</h2>
+
+        {error && <p className="text-accent text-sm mb-3">{error}</p>}
 
         <input
-          className="border bg-white border-gray-300 p-2 rounded w-full mb-3"
-          placeholder="Nome Team"
+          className="glass-input"
+          placeholder="Nome team"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-
         <input
-          className="border bg-white border-gray-300 p-2 rounded w-full mb-3"
+          className="glass-input"
           type="file"
           accept="image/*"
           onChange={(e) => setImage(e.target.files?.[0] || null)}
         />
 
         <button
-          className="w-full bg-primary text-white p-2 rounded hover:bg-primary/90 transition"
+          className="btn-gradient w-full py-2 mt-2 mb-2"
           onClick={handleCreateTeam}
         >
           Crea Team
         </button>
 
-        <div className="mt-6 text-center">
+        <div className="mt-4 text-center">
           <button
             onClick={() => navigate("/teams")}
-            className="w-40 bg-gray-300 text-black p-2 rounded hover:bg-gray-400 transition"
+            className="text-white/50 hover:text-white/80 text-sm"
           >
-            Indietro
+            Annulla
           </button>
         </div>
       </div>

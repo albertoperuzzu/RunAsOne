@@ -18,67 +18,56 @@ function HomePage() {
 
   useEffect(() => {
     if (!isAuthenticated || !token) return;
-
     fetch(`${API_BASE_URL}/handle_invites/check_invites`, {
       credentials: "include",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
-      .then((data) => {
-        setPendingInvites(data);
-        setLoadingInvites(false);
-      })
+      .then((data) => { setPendingInvites(data); setLoadingInvites(false); })
       .catch(() => setLoadingInvites(false));
   }, [isAuthenticated, token]);
 
   return (
-    <div className="min-h-screen text-gray-800">
+    <div className="min-h-screen text-white">
       <Navbar />
       <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)]">
-        <h1 className="text-2xl mb-8 font-bold">Ciao {nickname}!</h1>
 
-        <img
-          src={logo}
-          alt="RunAsOne logo"
-          className="w-40 h-40 mb-8"
-        />
+        <div className="glass rounded-2xl p-8 flex flex-col items-center w-full max-w-xs">
+          <img src={logo} alt="RunAsOne logo" className="w-28 h-28 mb-4 drop-shadow-lg" />
+          <h1 className="text-white text-xl font-bold mb-6">Ciao {nickname}!</h1>
 
-        {!garmin_connected ? (
-          <div className="flex flex-col items-center space-y-4">
-            <Button variant="garmin" onClick={() => navigate("/garmin-connect")}>
-              Connetti a Garmin
-            </Button>
+          {!garmin_connected ? (
+            <div className="flex flex-col items-center space-y-3 w-full">
+              <Button variant="garmin" onClick={() => navigate("/garmin-connect")}>
+                Connetti a Garmin
+              </Button>
+              <Button variant="primary" onClick={() => navigate("/teams")}>
+                Team
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center space-y-3 w-full">
+              <Button variant="primary" onClick={() => navigate("/activities")}>
+                Attività
+              </Button>
+              <Button variant="primary" onClick={() => navigate("/teams")}>
+                Team
+              </Button>
+            </div>
+          )}
 
-            <Button variant="primary" onClick={() => navigate("/teams")}>
-              Team
-            </Button>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center space-y-4">
-            <Button variant="primary" onClick={() => navigate("/activities")}>
-              Attività
-            </Button>
+          {!loadingInvites && pendingInvites.length > 0 && (
+            <div className="mt-5 text-center">
+              <p className="text-accent text-sm font-semibold mb-2">
+                Hai {pendingInvites.length} invito{pendingInvites.length > 1 ? "i" : ""} a un team!
+              </p>
+              <Button variant="primary" onClick={() => navigate("/invites")}>
+                Visualizza
+              </Button>
+            </div>
+          )}
+        </div>
 
-            <Button variant="primary" onClick={() => navigate("/teams")}>
-              Team
-            </Button>
-          </div>
-        )}
-
-        {!loadingInvites && pendingInvites.length > 0 && (
-          <div className="mb-4 text-center">
-            <p className="text-md font-medium text-red-600">
-              Hai {pendingInvites.length} invito
-              {pendingInvites.length > 1 ? "i" : ""}
-              {" "}ad un team!
-            </p>
-            <Button variant="primary" onClick={() => navigate("/invites")}>
-              Visualizza Inviti
-            </Button>
-          </div>
-        )}
       </div>
       <Footer />
     </div>

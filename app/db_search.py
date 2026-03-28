@@ -1,4 +1,4 @@
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, Form
 from fastapi.responses import JSONResponse
 from app.database import get_session
@@ -44,10 +44,17 @@ def get_my_teams(
     teams = user.teams
     result = []
     for team in teams:
+        link = db.exec(
+            select(UserTeamLink).where(
+                UserTeamLink.team_id == team.id,
+                UserTeamLink.user_id == current_user.id
+            )
+        ).first()
         result.append({
             "id": team.id,
             "name": team.name,
             "image_url": team.image_url,
+            "is_admin": link.role == "admin" if link else False,
             "members": [{"id": member.id, "email": member.email} for member in team.members]
         })
     return result
@@ -100,7 +107,11 @@ def get_team(
                     "date": a.date,
                     "elevation": a.elevation,
                     "avg_speed": a.avg_speed,
-                    "activity_type": a.activity_type
+                    "activity_type": a.activity_type,
+                    "user": {
+                        "username": user.name,
+                        "profile_img_url": profile_img,
+                    },
                 })
 
     activities.sort(key=lambda x: x["date"], reverse=True)
@@ -138,6 +149,44 @@ async def create_team(
     db.add(link)
     db.commit()
     return JSONResponse(status_code=201, content={"message": "Team creato", "team_id": new_team.id})
+
+
+@router.put("/teams/{team_id}")
+async def update_team(
+    team_id: int,
+    name: Optional[str] = Form(None),
+    image: Optional[UploadFile] = File(None),
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    link = session.exec(
+        select(UserTeamLink).where(
+            UserTeamLink.team_id == team_id,
+            UserTeamLink.user_id == current_user.id
+        )
+    ).first()
+    if not link or link.role != "admin":
+        raise HTTPException(status_code=403, detail="Solo l'admin può modificare il team")
+
+    team = session.get(Team, team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team non trovato")
+
+    if name:
+        team.name = name
+
+    if image and image.filename:
+        extension = image.filename.split(".")[-1]
+        filename = f"{uuid.uuid4()}.{extension}"
+        filepath = os.path.join(UPLOAD_DIR, filename)
+        with open(filepath, "wb") as f:
+            f.write(await image.read())
+        team.image_url = filename
+
+    session.add(team)
+    session.commit()
+    session.refresh(team)
+    return {"id": team.id, "name": team.name, "image_url": team.image_url}
 
 
 @router.get("/teams/{team_id}/stats", response_model=TeamStatsResponse)
@@ -217,6 +266,7 @@ async def create_event(
     start_place: str = Form(...),
     end_place: Optional[str] = Form(None),
     event_type: Optional[str] = Form(None),
+    distance_km: Optional[float] = Form(None),
     image: Optional[UploadFile] = File(None),
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
@@ -228,13 +278,16 @@ async def create_event(
     if current_user not in team.members:
         raise HTTPException(status_code=403, detail="Non appartieni a questo team")
 
-    img_url = "/public/default_event_img.jpg"
+    img_url = None
 
-    if image:
-        file_location = f"public/event_images/{team_id}_{image.filename}"
-        with open(file_location, "wb") as f:
+    if image and image.filename:
+        os.makedirs(os.path.join(UPLOAD_DIR, "events"), exist_ok=True)
+        extension = image.filename.split(".")[-1]
+        filename = f"events/{uuid.uuid4()}.{extension}"
+        filepath = os.path.join(UPLOAD_DIR, filename)
+        with open(filepath, "wb") as f:
             f.write(await image.read())
-        img_url = "/" + file_location
+        img_url = filename
 
     new_event = TeamEvent(
         team_id=team_id,
@@ -246,6 +299,7 @@ async def create_event(
         start_place=start_place,
         end_place=end_place,
         event_type=event_type,
+        distance_km=distance_km,
         event_img_url=img_url
     )
 
@@ -261,12 +315,76 @@ def list_team_events(team_id: int, session: Session = Depends(get_session)):
     events = session.exec(
         select(TeamEvent).where(TeamEvent.team_id == team_id)
     ).all()
+    cutoff = datetime.now() - timedelta(hours=24)
+    return [e for e in events if datetime.combine(e.date, e.hour) >= cutoff]
 
-    now = datetime.now()
 
-    future_events = [
-        e for e in events
-        if datetime.combine(e.date, e.hour) >= now
-    ]
+@router.get("/teams/{team_id}/past_events", response_model=List[TeamEvent])
+def list_past_events(team_id: int, session: Session = Depends(get_session)):
+    events = session.exec(
+        select(TeamEvent).where(TeamEvent.team_id == team_id)
+    ).all()
+    cutoff = datetime.now() - timedelta(hours=24)
+    return [e for e in events if datetime.combine(e.date, e.hour) < cutoff]
 
-    return future_events
+
+@router.put("/teams/{team_id}/events/{event_id}", response_model=TeamEvent)
+async def update_event(
+    team_id: int,
+    event_id: int,
+    date: date = Form(...),
+    hour: time = Form(...),
+    name: str = Form(...),
+    description: str = Form(...),
+    start_place: str = Form(...),
+    end_place: Optional[str] = Form(None),
+    event_type: Optional[str] = Form(None),
+    distance_km: Optional[float] = Form(None),
+    image: Optional[UploadFile] = File(None),
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    event = session.get(TeamEvent, event_id)
+    if not event or event.team_id != team_id:
+        raise HTTPException(status_code=404, detail="Evento non trovato")
+    if event.creator_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Solo il creatore può modificare l'evento")
+
+    event.name = name
+    event.description = description
+    event.date = date
+    event.hour = hour
+    event.start_place = start_place
+    event.end_place = end_place
+    event.event_type = event_type
+    event.distance_km = distance_km
+
+    if image and image.filename:
+        os.makedirs(os.path.join(UPLOAD_DIR, "events"), exist_ok=True)
+        extension = image.filename.split(".")[-1]
+        filename = f"events/{uuid.uuid4()}.{extension}"
+        filepath = os.path.join(UPLOAD_DIR, filename)
+        with open(filepath, "wb") as f:
+            f.write(await image.read())
+        event.event_img_url = filename
+
+    session.add(event)
+    session.commit()
+    session.refresh(event)
+    return event
+
+
+@router.delete("/teams/{team_id}/events/{event_id}", status_code=204)
+def delete_event(
+    team_id: int,
+    event_id: int,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    event = session.get(TeamEvent, event_id)
+    if not event or event.team_id != team_id:
+        raise HTTPException(status_code=404, detail="Evento non trovato")
+    if event.creator_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Solo il creatore può cancellare l'evento")
+    session.delete(event)
+    session.commit()

@@ -84,5 +84,6 @@ class TeamEvent(SQLModel, table=True):
     start_place: str = Field(nullable=False)
     end_place: Optional[str] = None
     event_type: Optional[str] = None
-    event_img_url: Optional[str] = Field(default="/public/default_event_img.jpg")
+    distance_km: Optional[float] = None
+    event_img_url: Optional[str] = Field(default=None)
     team: Optional["Team"] = Relationship(back_populates="events")

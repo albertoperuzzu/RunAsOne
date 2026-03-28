@@ -17,10 +17,7 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         credentials: "include",
-        body: new URLSearchParams({
-          username: email,
-          password: password
-        })
+        body: new URLSearchParams({ username: email, password }),
       });
 
       const data = await res.json();
@@ -29,33 +26,31 @@ export default function LoginPage() {
         login(data.access_token, {
           nickname: data.nickname,
           profile_img_url: data.profile_img_url,
-          garmin_connected: data.garmin_connected
+          garmin_connected: data.garmin_connected,
         });
-
         navigate("/home");
       } else {
         setErrorMessage(data.detail || "Errore nel login.");
       }
-    } catch (error) {
+    } catch {
       setErrorMessage("Errore di rete o del server.");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto pt-6">
-      <div className="max-w-md bg-white/70 mx-auto p-6 shadow-md rounded-lg">
-        <h2 className="text-2xl font-bold mb-4">Login</h2>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="glass rounded-2xl p-8 w-full max-w-sm">
+        <h2 className="text-white text-2xl font-bold mb-6 text-center">Accedi</h2>
 
         <input
-          className="border bg-white border-gray-300 p-2 rounded w-full mb-3"
+          className="glass-input"
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-
         <input
-          className="border bg-white border-gray-300 p-2 rounded w-full mb-3"
+          className="glass-input"
           type="password"
           placeholder="Password"
           value={password}
@@ -63,21 +58,18 @@ export default function LoginPage() {
         />
 
         {errorMessage && (
-          <p className="text-red-600 text-sm mb-3">{errorMessage}</p>
+          <p className="text-accent text-sm mb-3">{errorMessage}</p>
         )}
 
-        <button
-          onClick={handleLogin}
-          className="w-full bg-primary text-white p-2 rounded hover:bg-primary/90 transition"
-        >
+        <button onClick={handleLogin} className="btn-gradient w-full py-2 mt-1 mb-2">
           Accedi
         </button>
 
-        <div className="mt-10 text-center">
-          <p className="text-sm text-gray-700 mb-2">Non hai ancora un account?</p>
+        <div className="mt-6 text-center">
+          <p className="text-white/60 text-sm mb-3">Non hai ancora un account?</p>
           <button
             onClick={() => navigate("/register")}
-            className="w-40 bg-primary text-white p-2 rounded hover:bg-primary/90 transition"
+            className="text-white/80 border border-white/30 rounded-lg px-6 py-2 text-sm hover:bg-white/10 transition"
           >
             Registrati
           </button>
