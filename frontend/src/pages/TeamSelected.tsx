@@ -259,7 +259,7 @@ export default function TeamSelected() {
         {selectedTab === "home" && (
           <div className="text-center">
             <img
-              src={`${API_BASE_URL}/uploads/${team.image_url}`}
+              src={team.image_url.startsWith("http") ? team.image_url : `${API_BASE_URL}/uploads/${team.image_url}`}
               alt={team.name}
               className="w-24 h-24 rounded-full object-cover mx-auto mb-3 border-2 border-white/30 shadow-lg"
             />
@@ -421,7 +421,7 @@ export default function TeamSelected() {
                     <li key={event.id} className="glass rounded-xl overflow-hidden">
                       <div className="flex items-start gap-4 p-4">
                         {event.event_img_url ? (
-                          <img src={`${API_BASE_URL}/uploads/${event.event_img_url}`} alt={event.name}
+                          <img src={event.event_img_url.startsWith("http") ? event.event_img_url : `${API_BASE_URL}/uploads/${event.event_img_url}`} alt={event.name}
                             className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
                         ) : (
                           <div className="w-16 h-16 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
@@ -517,7 +517,7 @@ export default function TeamSelected() {
                     <li key={event.id} className="glass rounded-xl overflow-hidden opacity-60">
                       <div className="flex items-start gap-4 p-4">
                         {event.event_img_url ? (
-                          <img src={`${API_BASE_URL}/uploads/${event.event_img_url}`} alt={event.name}
+                          <img src={event.event_img_url.startsWith("http") ? event.event_img_url : `${API_BASE_URL}/uploads/${event.event_img_url}`} alt={event.name}
                             className="w-14 h-14 rounded-lg object-cover flex-shrink-0 grayscale" />
                         ) : (
                           <div className="w-14 h-14 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">

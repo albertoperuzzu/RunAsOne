@@ -112,7 +112,7 @@ export default function TeamPage() {
                       src={
                         editImage
                           ? URL.createObjectURL(editImage)
-                          : `${API_BASE_URL}/uploads/${team.image_url}`
+                          : team.image_url.startsWith("http") ? team.image_url : `${API_BASE_URL}/uploads/${team.image_url}`
                       }
                       alt="anteprima"
                       className="w-14 h-14 rounded-full object-cover border border-white/30 flex-shrink-0"
@@ -155,7 +155,7 @@ export default function TeamPage() {
                   className="glass rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:shadow-xl transition"
                 >
                   <img
-                    src={`${API_BASE_URL}/uploads/${team.image_url}`}
+                    src={team.image_url.startsWith("http") ? team.image_url : `${API_BASE_URL}/uploads/${team.image_url}`}
                     alt={team.name}
                     className="w-14 h-14 object-cover rounded-full border border-white/30 shadow flex-shrink-0"
                   />

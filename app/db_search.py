@@ -5,6 +5,7 @@ from app.database import get_session
 from typing import List, Optional
 from app.models import User, Team, UserTeamLink, Activity, TeamEvent
 from app.custom_beans import TeamStatsResponse
+from app.cloudinary_utils import is_production, upload_media
 from sqlmodel import Session, select
 from app.auth_helpers import get_current_user
 import uuid
@@ -86,7 +87,7 @@ def get_team(
         user = db.get(User, l.user_id)
         if user:
             profile_img = user.profile_img_url or "/default_user_img.jpg"
-            if not profile_img.startswith("/uploads/") and not profile_img.startswith("/"):
+            if not profile_img.startswith("/uploads/") and not profile_img.startswith("/") and not profile_img.startswith("http"):
                 profile_img = f"/uploads/{profile_img}"
 
             members.append({
@@ -133,14 +134,19 @@ async def create_team(
     db: Session = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
-    extension = image.filename.split(".")[-1]
-    filename = f"{uuid.uuid4()}.{extension}"
-    filepath = os.path.join(UPLOAD_DIR, filename)
+    content = image.file.read()
 
-    with open(filepath, "wb") as f:
-        shutil.copyfileobj(image.file, f)
+    if is_production():
+        image_url = upload_media(content, folder="teams")
+    else:
+        extension = image.filename.split(".")[-1]
+        filename = f"{uuid.uuid4()}.{extension}"
+        filepath = os.path.join(UPLOAD_DIR, filename)
+        with open(filepath, "wb") as f:
+            f.write(content)
+        image_url = filename
 
-    new_team = Team(name=name, image_url=filename)
+    new_team = Team(name=name, image_url=image_url)
     db.add(new_team)
     db.commit()
     db.refresh(new_team)
@@ -176,12 +182,16 @@ async def update_team(
         team.name = name
 
     if image and image.filename:
-        extension = image.filename.split(".")[-1]
-        filename = f"{uuid.uuid4()}.{extension}"
-        filepath = os.path.join(UPLOAD_DIR, filename)
-        with open(filepath, "wb") as f:
-            f.write(await image.read())
-        team.image_url = filename
+        content = await image.read()
+        if is_production():
+            team.image_url = upload_media(content, folder="teams")
+        else:
+            extension = image.filename.split(".")[-1]
+            filename = f"{uuid.uuid4()}.{extension}"
+            filepath = os.path.join(UPLOAD_DIR, filename)
+            with open(filepath, "wb") as f:
+                f.write(content)
+            team.image_url = filename
 
     session.add(team)
     session.commit()
@@ -281,13 +291,17 @@ async def create_event(
     img_url = None
 
     if image and image.filename:
-        os.makedirs(os.path.join(UPLOAD_DIR, "events"), exist_ok=True)
-        extension = image.filename.split(".")[-1]
-        filename = f"events/{uuid.uuid4()}.{extension}"
-        filepath = os.path.join(UPLOAD_DIR, filename)
-        with open(filepath, "wb") as f:
-            f.write(await image.read())
-        img_url = filename
+        content = await image.read()
+        if is_production():
+            img_url = upload_media(content, folder="events")
+        else:
+            os.makedirs(os.path.join(UPLOAD_DIR, "events"), exist_ok=True)
+            extension = image.filename.split(".")[-1]
+            filename = f"events/{uuid.uuid4()}.{extension}"
+            filepath = os.path.join(UPLOAD_DIR, filename)
+            with open(filepath, "wb") as f:
+                f.write(content)
+            img_url = filename
 
     new_event = TeamEvent(
         team_id=team_id,
@@ -360,13 +374,17 @@ async def update_event(
     event.distance_km = distance_km
 
     if image and image.filename:
-        os.makedirs(os.path.join(UPLOAD_DIR, "events"), exist_ok=True)
-        extension = image.filename.split(".")[-1]
-        filename = f"events/{uuid.uuid4()}.{extension}"
-        filepath = os.path.join(UPLOAD_DIR, filename)
-        with open(filepath, "wb") as f:
-            f.write(await image.read())
-        event.event_img_url = filename
+        content = await image.read()
+        if is_production():
+            event.event_img_url = upload_media(content, folder="events")
+        else:
+            os.makedirs(os.path.join(UPLOAD_DIR, "events"), exist_ok=True)
+            extension = image.filename.split(".")[-1]
+            filename = f"events/{uuid.uuid4()}.{extension}"
+            filepath = os.path.join(UPLOAD_DIR, filename)
+            with open(filepath, "wb") as f:
+                f.write(content)
+            event.event_img_url = filename
 
     session.add(event)
     session.commit()

@@ -4,6 +4,7 @@ from app.models import User
 from app.auth_helpers import get_current_user
 from app.database import get_session
 from app.utils import verify_password, hash_password
+from app.cloudinary_utils import is_production, upload_media
 from pydantic import BaseModel
 import shutil
 import os
@@ -64,11 +65,16 @@ def update_email(
 
 @router.post("/upload_image")
 def upload_image(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
+    content = file.file.read()
+
+    if is_production():
+        url = upload_media(content, folder="profiles")
+        return {"filename": url}
+
     filename = f"{current_user.id}_{file.filename}"
     file_path = os.path.join(UPLOAD_DIR, filename)
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
+        buffer.write(content)
     return {"filename": "profiles/" + filename}
 
 
