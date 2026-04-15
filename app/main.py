@@ -202,6 +202,10 @@ if os.getenv("RENDER") == "true":
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dir, "assets")), name="assets")
     app.mount("/public", StaticFiles(directory=public_dir), name="public")
 
+    @app.get("/favicon.svg", include_in_schema=False)
+    async def serve_favicon():
+        return FileResponse(os.path.join(frontend_dir, "favicon.svg"))
+
     @app.get("/privacy.html", include_in_schema=False)
     async def serve_privacy():
         return FileResponse(os.path.join(frontend_dir, "privacy.html"))

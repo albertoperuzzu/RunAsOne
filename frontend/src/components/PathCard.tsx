@@ -92,7 +92,7 @@ export default function PathCard({ path, onDelete }: Props) {
             download
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-indaco/70 hover:text-indaco border border-indaco/30 hover:border-indaco/60 px-3 py-1 rounded-lg transition"
+            className="btn-gradient font-semibold text-xs px-3 py-1.5 rounded-lg transition"
           >
             Scarica GPX
           </a>
