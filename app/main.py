@@ -202,18 +202,9 @@ if os.getenv("RENDER") == "true":
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dir, "assets")), name="assets")
     app.mount("/public", StaticFiles(directory=public_dir), name="public")
 
-    @app.get("/favicon.svg", include_in_schema=False)
-    async def serve_favicon():
-        return FileResponse(os.path.join(frontend_dir, "favicon.svg"))
-
-    @app.get("/privacy.html", include_in_schema=False)
-    async def serve_privacy():
-        return FileResponse(os.path.join(frontend_dir, "privacy.html"))
-
-    @app.get("/terms.html", include_in_schema=False)
-    async def serve_terms():
-        return FileResponse(os.path.join(frontend_dir, "terms.html"))
-
     @app.get("/{path:path}", include_in_schema=False)
     async def spa_fallback(path: str):
+        file_path = os.path.join(frontend_dir, path)
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
         return FileResponse(os.path.join(frontend_dir, "index.html"))
