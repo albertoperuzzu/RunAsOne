@@ -16,12 +16,12 @@ def _configure():
     )
 
 
-def upload_media(file_content: bytes, folder: str) -> str:
+def upload_media(file_content: bytes, folder: str, resource_type: str = "image") -> str:
     """Upload bytes to Cloudinary and return the secure URL."""
     _configure()
     result = cloudinary.uploader.upload(
         file_content,
         folder=folder,
-        resource_type="image",
+        resource_type=resource_type,
     )
     return result["secure_url"]

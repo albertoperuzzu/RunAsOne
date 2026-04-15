@@ -5,13 +5,14 @@ from fastapi.responses import JSONResponse
 from sqlmodel import select
 from app.models import User, UserCreate
 from app.utils import hash_password, verify_password
-from app.database import engine, create_db_and_tables, get_session
+from app.database import engine, create_db_and_tables, migrate_db, get_session
 from fastapi.middleware.cors import CORSMiddleware
 from app.garmin_auth import router as garmin_auth_router
 from app.garmin_api import router as garmin_router
 from app.db_search import router as db_router
 from app.invites import router as invites_router
 from app.profile import router as profile_router
+from app.paths import router as paths_router
 from app.db_search import UPLOAD_DIR
 from sqlalchemy.orm import Session
 from jose import jwt
@@ -21,6 +22,7 @@ import logging
 
 app = FastAPI(debug=True)
 create_db_and_tables()
+migrate_db()
 os.makedirs("uploads", exist_ok=True)
 
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
@@ -185,6 +187,7 @@ app.include_router(garmin_router, prefix="/garmin_api")
 app.include_router(db_router, prefix="/db")
 app.include_router(invites_router, prefix="/handle_invites")
 app.include_router(profile_router, prefix="/handle_profile")
+app.include_router(paths_router, prefix="/paths")
 
 # ===========================
 # SERVE FRONTEND SOLO IN PRODUZIONE

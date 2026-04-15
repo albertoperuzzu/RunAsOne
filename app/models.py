@@ -86,4 +86,44 @@ class TeamEvent(SQLModel, table=True):
     event_type: Optional[str] = None
     distance_km: Optional[float] = None
     event_img_url: Optional[str] = Field(default=None)
+    path_id: Optional[int] = Field(default=None, foreign_key="userpath.id")
     team: Optional["Team"] = Relationship(back_populates="events")
+
+
+class UserPath(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
+    name: str
+    photo_url: Optional[str] = Field(default=None)
+    summary_polyline: Optional[str] = Field(default=None)
+    distance: Optional[float] = Field(default=None)       # metres
+    elevation_gain: Optional[float] = Field(default=None) # D+ metres
+    gpx_url: Optional[str] = Field(default=None)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class EventPhoto(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    event_id: int = Field(foreign_key="teamevent.id")
+    user_id: int = Field(foreign_key="user.id")
+    photo_url: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class PostPhoto(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    post_id: int = Field(foreign_key="teampost.id")
+    user_id: int = Field(foreign_key="user.id")
+    photo_url: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class TeamPost(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    team_id: int = Field(foreign_key="team.id")
+    user_id: int = Field(foreign_key="user.id")
+    title: str
+    description: str
+    photo_url: Optional[str] = Field(default=None)
+    event_id: Optional[int] = Field(default=None, foreign_key="teamevent.id")
+    created_at: datetime = Field(default_factory=datetime.utcnow)

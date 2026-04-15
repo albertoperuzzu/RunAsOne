@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, Form
 from fastapi.responses import JSONResponse
 from app.database import get_session
 from typing import List, Optional
-from app.models import User, Team, UserTeamLink, Activity, TeamEvent
+from app.models import User, Team, UserTeamLink, Activity, TeamEvent, TeamPost, EventPhoto, PostPhoto
 from app.custom_beans import TeamStatsResponse
 from app.cloudinary_utils import is_production, upload_media
 from sqlmodel import Session, select
@@ -278,6 +278,7 @@ async def create_event(
     event_type: Optional[str] = Form(None),
     distance_km: Optional[float] = Form(None),
     image: Optional[UploadFile] = File(None),
+    path_id: Optional[int] = Form(None),
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
@@ -314,32 +315,64 @@ async def create_event(
         end_place=end_place,
         event_type=event_type,
         distance_km=distance_km,
-        event_img_url=img_url
+        event_img_url=img_url,
+        path_id=path_id,
     )
 
     session.add(new_event)
     session.commit()
     session.refresh(new_event)
 
+    # Auto-crea un post in bacheca per l'evento
+    auto_post = TeamPost(
+        team_id=team_id,
+        user_id=current_user.id,
+        title=f"🗓️ {name}",
+        description=description,
+        photo_url=team.image_url,
+        event_id=new_event.id,
+    )
+    session.add(auto_post)
+    session.commit()
+
     return new_event
 
 
-@router.get("/teams/{team_id}/events", response_model=List[TeamEvent])
+def _event_to_dict(event: TeamEvent, session: Session) -> dict:
+    photos = session.exec(select(EventPhoto).where(EventPhoto.event_id == event.id)).all()
+    return {
+        "id": event.id,
+        "creator_id": event.creator_id,
+        "name": event.name,
+        "date": str(event.date),
+        "hour": str(event.hour),
+        "description": event.description,
+        "start_place": event.start_place,
+        "end_place": event.end_place,
+        "event_type": event.event_type,
+        "distance_km": event.distance_km,
+        "event_img_url": event.event_img_url,
+        "path_id": event.path_id,
+        "photos": [{"id": p.id, "photo_url": p.photo_url, "user_id": p.user_id} for p in photos],
+    }
+
+
+@router.get("/teams/{team_id}/events")
 def list_team_events(team_id: int, session: Session = Depends(get_session)):
     events = session.exec(
         select(TeamEvent).where(TeamEvent.team_id == team_id)
     ).all()
     cutoff = datetime.now() - timedelta(hours=24)
-    return [e for e in events if datetime.combine(e.date, e.hour) >= cutoff]
+    return [_event_to_dict(e, session) for e in events if datetime.combine(e.date, e.hour) >= cutoff]
 
 
-@router.get("/teams/{team_id}/past_events", response_model=List[TeamEvent])
+@router.get("/teams/{team_id}/past_events")
 def list_past_events(team_id: int, session: Session = Depends(get_session)):
     events = session.exec(
         select(TeamEvent).where(TeamEvent.team_id == team_id)
     ).all()
     cutoff = datetime.now() - timedelta(hours=24)
-    return [e for e in events if datetime.combine(e.date, e.hour) < cutoff]
+    return [_event_to_dict(e, session) for e in events if datetime.combine(e.date, e.hour) < cutoff]
 
 
 @router.put("/teams/{team_id}/events/{event_id}", response_model=TeamEvent)
@@ -355,6 +388,7 @@ async def update_event(
     event_type: Optional[str] = Form(None),
     distance_km: Optional[float] = Form(None),
     image: Optional[UploadFile] = File(None),
+    path_id: Optional[int] = Form(None),
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
@@ -372,6 +406,7 @@ async def update_event(
     event.end_place = end_place
     event.event_type = event_type
     event.distance_km = distance_km
+    event.path_id = path_id
 
     if image and image.filename:
         content = await image.read()
@@ -405,4 +440,263 @@ def delete_event(
     if event.creator_id != current_user.id:
         raise HTTPException(status_code=403, detail="Solo il creatore può cancellare l'evento")
     session.delete(event)
+    session.commit()
+
+
+# ── Bacheca (TeamPost) ──────────────────────────────────────────────────────
+
+def _post_to_dict(post: TeamPost, db: Session) -> dict:
+    user = db.get(User, post.user_id)
+    profile_img = user.profile_img_url or "/public/default_user_img.jpg"
+    if not profile_img.startswith("/uploads/") and not profile_img.startswith("/") and not profile_img.startswith("http"):
+        profile_img = f"/uploads/{profile_img}"
+    event_info = None
+    if post.event_id:
+        ev = db.get(TeamEvent, post.event_id)
+        if ev:
+            event_info = {"id": ev.id, "name": ev.name}
+    post_photos = db.exec(select(PostPhoto).where(PostPhoto.post_id == post.id)).all()
+    return {
+        "id": post.id,
+        "title": post.title,
+        "description": post.description,
+        "photo_url": post.photo_url,
+        "event_id": post.event_id,
+        "created_at": post.created_at.isoformat(),
+        "user": {"id": user.id, "name": user.name, "profile_img_url": profile_img},
+        "event": event_info,
+        "photos": [{"id": p.id, "photo_url": p.photo_url, "user_id": p.user_id} for p in post_photos],
+    }
+
+
+@router.get("/teams/{team_id}/posts")
+def get_posts(
+    team_id: int,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    link = session.exec(
+        select(UserTeamLink).where(UserTeamLink.team_id == team_id, UserTeamLink.user_id == current_user.id)
+    ).first()
+    if not link:
+        raise HTTPException(status_code=403, detail="Non sei membro di questo team")
+    posts = session.exec(
+        select(TeamPost).where(TeamPost.team_id == team_id).order_by(TeamPost.created_at.desc())
+    ).all()
+    return [_post_to_dict(p, session) for p in posts]
+
+
+@router.post("/teams/{team_id}/posts")
+async def create_post(
+    team_id: int,
+    title: str = Form(...),
+    description: str = Form(...),
+    event_id: Optional[int] = Form(None),
+    photo: Optional[UploadFile] = File(None),
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    link = session.exec(
+        select(UserTeamLink).where(UserTeamLink.team_id == team_id, UserTeamLink.user_id == current_user.id)
+    ).first()
+    if not link:
+        raise HTTPException(status_code=403, detail="Non sei membro di questo team")
+
+    photo_url = None
+    if photo and photo.filename:
+        content = await photo.read()
+        if is_production():
+            photo_url = upload_media(content, folder="posts")
+        else:
+            os.makedirs(os.path.join(UPLOAD_DIR, "posts"), exist_ok=True)
+            ext = photo.filename.rsplit(".", 1)[-1]
+            filename = f"posts/{uuid.uuid4()}.{ext}"
+            with open(os.path.join(UPLOAD_DIR, filename), "wb") as f:
+                f.write(content)
+            photo_url = filename
+
+    post = TeamPost(team_id=team_id, user_id=current_user.id, title=title, description=description,
+                    photo_url=photo_url, event_id=event_id)
+    session.add(post)
+    session.commit()
+    session.refresh(post)
+    return _post_to_dict(post, session)
+
+
+@router.put("/teams/{team_id}/posts/{post_id}")
+async def update_post(
+    team_id: int,
+    post_id: int,
+    title: str = Form(...),
+    description: str = Form(...),
+    event_id: Optional[int] = Form(None),
+    photo: Optional[UploadFile] = File(None),
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    link = session.exec(
+        select(UserTeamLink).where(UserTeamLink.team_id == team_id, UserTeamLink.user_id == current_user.id)
+    ).first()
+    if not link:
+        raise HTTPException(status_code=403, detail="Non sei membro di questo team")
+
+    post = session.get(TeamPost, post_id)
+    if not post or post.team_id != team_id:
+        raise HTTPException(status_code=404, detail="Post non trovato")
+    if post.user_id != current_user.id and link.role != "admin":
+        raise HTTPException(status_code=403, detail="Non puoi modificare questo post")
+
+    if photo and photo.filename:
+        content = await photo.read()
+        if is_production():
+            post.photo_url = upload_media(content, folder="posts")
+        else:
+            os.makedirs(os.path.join(UPLOAD_DIR, "posts"), exist_ok=True)
+            ext = photo.filename.rsplit(".", 1)[-1]
+            filename = f"posts/{uuid.uuid4()}.{ext}"
+            with open(os.path.join(UPLOAD_DIR, filename), "wb") as f:
+                f.write(content)
+            post.photo_url = filename
+
+    post.title = title
+    post.description = description
+    post.event_id = event_id
+    session.add(post)
+    session.commit()
+    session.refresh(post)
+    return _post_to_dict(post, session)
+
+
+@router.delete("/teams/{team_id}/posts/{post_id}", status_code=204)
+def delete_post(
+    team_id: int,
+    post_id: int,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    link = session.exec(
+        select(UserTeamLink).where(UserTeamLink.team_id == team_id, UserTeamLink.user_id == current_user.id)
+    ).first()
+    if not link:
+        raise HTTPException(status_code=403, detail="Non sei membro di questo team")
+
+    post = session.get(TeamPost, post_id)
+    if not post or post.team_id != team_id:
+        raise HTTPException(status_code=404, detail="Post non trovato")
+    if post.user_id != current_user.id and link.role != "admin":
+        raise HTTPException(status_code=403, detail="Non puoi eliminare questo post")
+
+    session.delete(post)
+    session.commit()
+
+
+# ── Foto eventi ──────────────────────────────────────────────────────────────
+
+def _check_event_permission(team_id: int, event_id: int, current_user: User, session: Session):
+    link = session.exec(
+        select(UserTeamLink).where(UserTeamLink.team_id == team_id, UserTeamLink.user_id == current_user.id)
+    ).first()
+    if not link:
+        raise HTTPException(status_code=403, detail="Non sei membro di questo team")
+    event = session.get(TeamEvent, event_id)
+    if not event or event.team_id != team_id:
+        raise HTTPException(status_code=404, detail="Evento non trovato")
+    if event.creator_id != current_user.id and link.role != "admin":
+        raise HTTPException(status_code=403, detail="Solo il creatore o l'admin possono gestire le foto")
+    return event
+
+
+@router.post("/teams/{team_id}/events/{event_id}/photos")
+async def add_event_photo(
+    team_id: int,
+    event_id: int,
+    photo: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    _check_event_permission(team_id, event_id, current_user, session)
+    content = await photo.read()
+    if is_production():
+        photo_url = upload_media(content, folder="event_photos")
+    else:
+        os.makedirs(os.path.join(UPLOAD_DIR, "event_photos"), exist_ok=True)
+        ext = photo.filename.rsplit(".", 1)[-1]
+        filename = f"event_photos/{uuid.uuid4()}.{ext}"
+        with open(os.path.join(UPLOAD_DIR, filename), "wb") as f:
+            f.write(content)
+        photo_url = filename
+    new_photo = EventPhoto(event_id=event_id, user_id=current_user.id, photo_url=photo_url)
+    session.add(new_photo)
+    session.commit()
+    session.refresh(new_photo)
+    return {"id": new_photo.id, "photo_url": new_photo.photo_url, "user_id": new_photo.user_id}
+
+
+@router.delete("/teams/{team_id}/events/{event_id}/photos/{photo_id}", status_code=204)
+def delete_event_photo(
+    team_id: int, event_id: int, photo_id: int,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    _check_event_permission(team_id, event_id, current_user, session)
+    photo = session.get(EventPhoto, photo_id)
+    if not photo or photo.event_id != event_id:
+        raise HTTPException(status_code=404, detail="Foto non trovata")
+    session.delete(photo)
+    session.commit()
+
+
+# ── Foto post ─────────────────────────────────────────────────────────────────
+
+def _check_post_permission(team_id: int, post_id: int, current_user: User, session: Session):
+    link = session.exec(
+        select(UserTeamLink).where(UserTeamLink.team_id == team_id, UserTeamLink.user_id == current_user.id)
+    ).first()
+    if not link:
+        raise HTTPException(status_code=403, detail="Non sei membro di questo team")
+    post = session.get(TeamPost, post_id)
+    if not post or post.team_id != team_id:
+        raise HTTPException(status_code=404, detail="Post non trovato")
+    if post.user_id != current_user.id and link.role != "admin":
+        raise HTTPException(status_code=403, detail="Solo il creatore o l'admin possono gestire le foto")
+    return post
+
+
+@router.post("/teams/{team_id}/posts/{post_id}/photos")
+async def add_post_photo(
+    team_id: int,
+    post_id: int,
+    photo: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    _check_post_permission(team_id, post_id, current_user, session)
+    content = await photo.read()
+    if is_production():
+        photo_url = upload_media(content, folder="post_photos")
+    else:
+        os.makedirs(os.path.join(UPLOAD_DIR, "post_photos"), exist_ok=True)
+        ext = photo.filename.rsplit(".", 1)[-1]
+        filename = f"post_photos/{uuid.uuid4()}.{ext}"
+        with open(os.path.join(UPLOAD_DIR, filename), "wb") as f:
+            f.write(content)
+        photo_url = filename
+    new_photo = PostPhoto(post_id=post_id, user_id=current_user.id, photo_url=photo_url)
+    session.add(new_photo)
+    session.commit()
+    session.refresh(new_photo)
+    return {"id": new_photo.id, "photo_url": new_photo.photo_url, "user_id": new_photo.user_id}
+
+
+@router.delete("/teams/{team_id}/posts/{post_id}/photos/{photo_id}", status_code=204)
+def delete_post_photo(
+    team_id: int, post_id: int, photo_id: int,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    _check_post_permission(team_id, post_id, current_user, session)
+    photo = session.get(PostPhoto, photo_id)
+    if not photo or photo.post_id != post_id:
+        raise HTTPException(status_code=404, detail="Foto non trovata")
+    session.delete(photo)
     session.commit()

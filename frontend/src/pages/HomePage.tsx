@@ -13,7 +13,7 @@ function HomePage() {
   const [loadingInvites, setLoadingInvites] = useState(true);
   const navigate = useNavigate();
 
-  const { nickname, garmin_connected } = useUser();
+  const { nickname } = useUser();
   const { token, isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -36,25 +36,22 @@ function HomePage() {
           <img src={logo} alt="RunAsOne logo" className="w-28 h-28 mb-4 drop-shadow-lg" />
           <h1 className="text-white text-xl font-bold mb-6">Ciao {nickname}!</h1>
 
-          {!garmin_connected ? (
-            <div className="flex flex-col items-center space-y-3 w-full">
-              <Button variant="garmin" onClick={() => navigate("/garmin-connect")}>
-                Connetti a Garmin
-              </Button>
-              <Button variant="primary" onClick={() => navigate("/teams")}>
-                Team
-              </Button>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center space-y-3 w-full">
-              <Button variant="primary" onClick={() => navigate("/activities")}>
-                Attività
-              </Button>
-              <Button variant="primary" onClick={() => navigate("/teams")}>
-                Team
-              </Button>
-            </div>
-          )}
+          {/* Garmin integration hidden — pending API approval
+          <Button variant="garmin" onClick={() => navigate("/garmin-connect")}>
+            Connetti a Garmin
+          </Button>
+          <Button variant="primary" onClick={() => navigate("/activities")}>
+            Attività
+          </Button>
+          */}
+          <div className="flex flex-col items-center space-y-3 w-full">
+            <Button variant="primary" onClick={() => navigate("/paths")}>
+              Percorsi
+            </Button>
+            <Button variant="primary" onClick={() => navigate("/teams")}>
+              Team
+            </Button>
+          </div>
 
           {!loadingInvites && pendingInvites.length > 0 && (
             <div className="mt-5 text-center">
