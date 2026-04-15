@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, Form
 from fastapi.responses import JSONResponse
 from app.database import get_session
 from typing import List, Optional
-from app.models import User, Team, UserTeamLink, Activity, TeamEvent, TeamPost, EventPhoto, PostPhoto
+from app.models import User, Team, UserTeamLink, Activity, TeamEvent, TeamPost, EventPhoto, PostPhoto, Notification
 from app.custom_beans import TeamStatsResponse
 from app.cloudinary_utils import is_production, upload_media
 from sqlmodel import Session, select
@@ -334,6 +334,14 @@ async def create_event(
     )
     session.add(auto_post)
     session.commit()
+    session.refresh(auto_post)
+
+    _notify_team(
+        session, team_id, auto_post.id, current_user.id,
+        f"{current_user.name} ha creato l'evento \"{name}\" in {team.name}",
+    )
+    session.commit()
+    session.refresh(new_event)
 
     return new_event
 
@@ -445,6 +453,21 @@ def delete_event(
 
 # ── Bacheca (TeamPost) ──────────────────────────────────────────────────────
 
+def _notify_team(session: Session, team_id: int, post_id: int, author_id: int, message: str):
+    """Crea una Notification per ogni membro del team tranne l'autore."""
+    links = session.exec(
+        select(UserTeamLink).where(UserTeamLink.team_id == team_id)
+    ).all()
+    for link in links:
+        if link.user_id != author_id:
+            session.add(Notification(
+                user_id=link.user_id,
+                team_id=team_id,
+                post_id=post_id,
+                message=message,
+            ))
+
+
 def _post_to_dict(post: TeamPost, db: Session) -> dict:
     user = db.get(User, post.user_id)
     profile_img = user.profile_img_url or "/public/default_user_img.jpg"
@@ -520,6 +543,14 @@ async def create_post(
     session.add(post)
     session.commit()
     session.refresh(post)
+
+    team = session.get(Team, team_id)
+    _notify_team(
+        session, team_id, post.id, current_user.id,
+        f"{current_user.name} ha pubblicato \"{post.title}\" in {team.name if team else 'team'}",
+    )
+    session.commit()
+
     return _post_to_dict(post, session)
 
 

@@ -17,6 +17,7 @@ import TeamSelected from "./pages/TeamSelected.tsx";
 import InvitesPage from "./pages/InvitesPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import EditProfile from "./pages/EditProfile.tsx";
+import NotificationsPage from "./pages/NotificationsPage.tsx";
 
 function App() {
   return (
@@ -55,8 +56,12 @@ function App() {
             <ProfilePage /> 
           </PrivateRoute> }
         />
-        <Route path="/edit-profile" element={ <PrivateRoute> 
-            <EditProfile /> 
+        <Route path="/edit-profile" element={ <PrivateRoute>
+            <EditProfile />
+          </PrivateRoute> }
+        />
+        <Route path="/notifications" element={ <PrivateRoute>
+            <NotificationsPage />
           </PrivateRoute> }
         />
         <Route path="/teams/:id" element={<TeamSelected />} />

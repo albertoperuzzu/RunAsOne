@@ -127,3 +127,13 @@ class TeamPost(SQLModel, table=True):
     photo_url: Optional[str] = Field(default=None)
     event_id: Optional[int] = Field(default=None, foreign_key="teamevent.id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Notification(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    team_id: int = Field(foreign_key="team.id")
+    post_id: Optional[int] = Field(default=None, foreign_key="teampost.id")
+    message: str
+    is_read: bool = Field(default=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow)

@@ -759,10 +759,16 @@ export default function TeamSelected() {
                         value={editForm.description}
                         onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))} />
                       <div className="flex gap-2">
-                        <input className="glass-input mb-0 flex-1" type="date" value={editForm.date}
-                          onChange={(e) => setEditForm((p) => ({ ...p, date: e.target.value }))} />
-                        <input className="glass-input mb-0 flex-1" type="time" value={editForm.hour}
-                          onChange={(e) => setEditForm((p) => ({ ...p, hour: e.target.value }))} />
+                        <div className="flex-1">
+                          <p className="text-white/50 text-xs mb-1">Data *</p>
+                          <input className="glass-input mb-0 w-full" type="date" value={editForm.date}
+                            onChange={(e) => setEditForm((p) => ({ ...p, date: e.target.value }))} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-white/50 text-xs mb-1">Ora *</p>
+                          <input className="glass-input mb-0 w-full" type="time" value={editForm.hour}
+                            onChange={(e) => setEditForm((p) => ({ ...p, hour: e.target.value }))} />
+                        </div>
                       </div>
                       <input className="glass-input" placeholder="Luogo di partenza *" value={editForm.start_place}
                         onChange={(e) => setEditForm((p) => ({ ...p, start_place: e.target.value }))} />
@@ -884,10 +890,16 @@ export default function TeamSelected() {
                   value={newEvent.description}
                   onChange={(e) => setNewEvent((p) => ({ ...p, description: e.target.value }))} />
                 <div className="flex gap-2">
-                  <input className="glass-input mb-0 flex-1" type="date" value={newEvent.date}
-                    onChange={(e) => setNewEvent((p) => ({ ...p, date: e.target.value }))} />
-                  <input className="glass-input mb-0 flex-1" type="time" value={newEvent.hour}
-                    onChange={(e) => setNewEvent((p) => ({ ...p, hour: e.target.value }))} />
+                  <div className="flex-1">
+                    <p className="text-white/50 text-xs mb-1">Data *</p>
+                    <input className="glass-input mb-0 w-full" type="date" value={newEvent.date}
+                      onChange={(e) => setNewEvent((p) => ({ ...p, date: e.target.value }))} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-white/50 text-xs mb-1">Ora *</p>
+                    <input className="glass-input mb-0 w-full" type="time" value={newEvent.hour}
+                      onChange={(e) => setNewEvent((p) => ({ ...p, hour: e.target.value }))} />
+                  </div>
                 </div>
                 <input className="glass-input" placeholder="Luogo di partenza *" value={newEvent.start_place}
                   onChange={(e) => setNewEvent((p) => ({ ...p, start_place: e.target.value }))} />

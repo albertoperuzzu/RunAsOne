@@ -1,13 +1,36 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Menu, X, Bell } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import API_BASE_URL from "../config";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const { logout } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+  const { logout, token } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const fetchUnread = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/notifications/unread-count`, {
+        credentials: "include",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadCount(data.count);
+      }
+    } catch {}
+  };
+
+  useEffect(() => {
+    fetchUnread();
+    const id = setInterval(fetchUnread, 30_000);
+    return () => clearInterval(id);
+  }, [token]);
 
   const handleLogout = () => {
     logout();
@@ -25,7 +48,22 @@ export default function Navbar() {
   }, []);
 
   return (
-    <div className="fixed top-4 right-4 z-50" ref={menuRef}>
+    <div className="fixed top-4 right-4 z-50 flex items-center gap-2" ref={menuRef}>
+      {/* Campanella notifiche */}
+      <button
+        onClick={() => { setIsOpen(false); location.pathname === "/notifications" ? navigate(-1) : navigate("/notifications"); }}
+        className="relative glass-dark text-white p-2 rounded-lg shadow-lg"
+        aria-label="Notifiche"
+      >
+        <Bell size={22} />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-accent text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 leading-none">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {/* Hamburger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="glass-dark text-white p-2 rounded-lg shadow-lg"
@@ -41,7 +79,7 @@ export default function Navbar() {
       )}
 
       {isOpen && (
-        <ul className="absolute right-0 mt-2 glass-dark rounded-xl p-4 space-y-3 w-40 text-right z-50">
+        <ul className="absolute top-full right-0 mt-1 glass-dark rounded-xl p-4 space-y-3 w-40 text-right z-50">
           {[
             { to: "/home", label: "Home" },
             { to: "/paths", label: "Percorsi" },

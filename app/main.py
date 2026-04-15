@@ -13,6 +13,7 @@ from app.db_search import router as db_router
 from app.invites import router as invites_router
 from app.profile import router as profile_router
 from app.paths import router as paths_router
+from app.notifications import router as notifications_router
 from app.db_search import UPLOAD_DIR
 from sqlalchemy.orm import Session
 from jose import jwt
@@ -188,6 +189,7 @@ app.include_router(db_router, prefix="/db")
 app.include_router(invites_router, prefix="/handle_invites")
 app.include_router(profile_router, prefix="/handle_profile")
 app.include_router(paths_router, prefix="/paths")
+app.include_router(notifications_router, prefix="/notifications")
 
 # ===========================
 # SERVE FRONTEND SOLO IN PRODUZIONE

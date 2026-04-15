@@ -65,6 +65,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     checkSession();
   }, []);
 
+  // Rinnova l'access token ogni 8 minuti (scade a 10).
+  // Chiama /me senza Authorization header: il backend usa il cookie di refresh
+  // e restituisce un nuovo token in new_access_token.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const id = setInterval(async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/me`, { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.new_access_token) setToken(data.new_access_token);
+        } else {
+          setIsAuthenticated(false);
+          setUser(null);
+          setToken(null);
+        }
+      } catch {}
+    }, 8 * 60 * 1000);
+    return () => clearInterval(id);
+  }, [isAuthenticated]);
+
   const login = (accessToken: string, userData: User) => {
     setToken(accessToken);
     setUser(userData);
