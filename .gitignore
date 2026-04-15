@@ -3,6 +3,7 @@
 
 # Database
 *.db
+*.dump
 static/
 uploads/
 
@@ -26,4 +27,3 @@ node_modules/
 CLAUDE.md
 
 migrate_to_pg.py
-backup.dump
