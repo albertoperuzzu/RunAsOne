@@ -51,6 +51,9 @@ function HomePage() {
             <Button variant="primary" onClick={() => navigate("/teams")}>
               Team
             </Button>
+            <Button variant="primary" onClick={() => navigate("/calendar")}>
+              Calendario
+            </Button>
           </div>
 
           {!loadingInvites && pendingInvites.length > 0 && (

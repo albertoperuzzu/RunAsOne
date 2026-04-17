@@ -669,7 +669,7 @@ export default function TeamSelected() {
         {/* ══ MEMBERS TAB ══════════════════════════════════════════════════ */}
         {selectedTab === "members" && (
           <div>
-            <h2 className="text-indaco text-2xl font-bold mb-4 text-center">Membri del team</h2>
+            <h2 className="text-indaco text-2xl font-bold drop-shadow mb-4">Membri del team</h2>
             <ul className="space-y-3">
               {team.members.map((member) => (
                 <li key={member.id} className="glass rounded-xl px-4 py-3 flex items-center justify-between">
@@ -726,7 +726,7 @@ export default function TeamSelected() {
         {/* ══ PATHS TAB ════════════════════════════════════════════════════ */}
         {selectedTab === "paths" && (
           <div>
-            <h2 className="text-indaco text-2xl font-bold mb-4 text-center">Percorsi del team</h2>
+            <h2 className="text-indaco text-2xl font-bold drop-shadow mb-4">Percorsi del team</h2>
             {teamPaths.length === 0 ? (
               <p className="text-white/40 text-sm text-center mt-8">Nessun percorso caricato dai membri.</p>
             ) : (
@@ -744,7 +744,7 @@ export default function TeamSelected() {
         {/* ══ EVENTS TAB ═══════════════════════════════════════════════════ */}
         {selectedTab === "events" && (
           <div>
-            <h2 className="text-indaco text-2xl font-bold mb-4 text-center">Eventi del team</h2>
+            <h2 className="text-indaco text-2xl font-bold drop-shadow mb-4">Eventi del team</h2>
 
             {/* Lista eventi attivi */}
             {events.length > 0 ? (

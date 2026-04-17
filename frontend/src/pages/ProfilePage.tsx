@@ -32,7 +32,7 @@ export default function ProfilePage() {
     <div className="min-h-screen pb-8">
       <Navbar />
       <div className="px-4 pt-8 max-w-sm mx-auto">
-        <h1 className="text-indaco text-2xl font-bold drop-shadow mb-6 text-center">
+        <h1 className="text-indaco text-2xl font-bold drop-shadow mb-6">
           Il tuo profilo
         </h1>
 

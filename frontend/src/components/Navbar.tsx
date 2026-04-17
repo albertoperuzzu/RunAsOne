@@ -82,6 +82,7 @@ export default function Navbar() {
         <ul className="absolute top-full right-0 mt-1 glass-dark rounded-xl p-4 space-y-3 w-40 text-right z-50">
           {[
             { to: "/home", label: "Home" },
+            { to: "/calendar", label: "Calendario" },
             { to: "/paths", label: "Percorsi" },
             { to: "/teams", label: "Teams" },
             { to: "/profile", label: "Profilo" },

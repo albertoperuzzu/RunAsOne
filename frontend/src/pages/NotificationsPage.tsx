@@ -5,9 +5,16 @@ import API_BASE_URL from "../config";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
+function resolveTeamImg(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  return `${API_BASE_URL}/uploads/${url}`;
+}
+
 type Notif = {
   id: number;
   team_id: number;
+  team_image_url: string | null;
   post_id: number | null;
   message: string;
   is_read: boolean;
@@ -34,28 +41,34 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     if (!token) return;
-    const headers = { Authorization: `Bearer ${token}` };
-
-    fetch(`${API_BASE_URL}/notifications/`, { credentials: "include", headers })
+    fetch(`${API_BASE_URL}/notifications/`, {
+      credentials: "include",
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then((r) => r.json())
-      .then((data: Notif[]) => {
-        setNotifications(data);
-        setLoading(false);
-        // segna tutte come lette in background
-        fetch(`${API_BASE_URL}/notifications/read-all`, {
-          method: "POST",
-          credentials: "include",
-          headers,
-        });
-      })
+      .then((data: Notif[]) => { setNotifications(data); setLoading(false); })
       .catch(() => setLoading(false));
   }, [token]);
+
+  const handleClick = (n: Notif) => {
+    if (!n.is_read) {
+      fetch(`${API_BASE_URL}/notifications/${n.id}/read`, {
+        method: "POST",
+        credentials: "include",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setNotifications((prev) =>
+        prev.map((x) => (x.id === n.id ? { ...x, is_read: true } : x))
+      );
+    }
+    navigate(`/teams/${n.team_id}`);
+  };
 
   return (
     <div className="min-h-screen text-white">
       <Navbar />
       <div className="max-w-lg mx-auto px-4 pt-20 pb-24">
-        <h1 className="text-xl font-bold text-indaco mb-5">Notifiche</h1>
+        <h1 className="text-indaco text-2xl font-bold drop-shadow mb-5">Notifiche</h1>
 
         {loading ? (
           <p className="text-white/50 text-sm text-center mt-10">Caricamento...</p>
@@ -65,18 +78,30 @@ export default function NotificationsPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {notifications.map((n) => (
-              <button
-                key={n.id}
-                onClick={() => navigate(`/teams/${n.team_id}`)}
-                className={`w-full text-left glass rounded-xl p-4 transition active:opacity-70 ${
-                  !n.is_read ? "border-l-2 border-accent" : ""
-                }`}
-              >
-                <p className="text-white/90 text-sm leading-snug">{n.message}</p>
-                <p className="text-white/40 text-xs mt-1">{timeAgo(n.created_at)}</p>
-              </button>
-            ))}
+            {notifications.map((n) => {
+              const teamImg = resolveTeamImg(n.team_image_url);
+              return (
+                <button
+                  key={n.id}
+                  onClick={() => handleClick(n)}
+                  className={`w-full text-left glass rounded-xl p-4 transition active:opacity-70 flex items-center gap-3 ${
+                    !n.is_read ? "border-l-2 border-accent" : "opacity-50"
+                  }`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white/90 text-sm leading-snug">{n.message}</p>
+                    <p className="text-white/40 text-xs mt-1">{timeAgo(n.created_at)}</p>
+                  </div>
+                  {teamImg && (
+                    <img
+                      src={teamImg}
+                      alt=""
+                      className="w-10 h-10 rounded-lg object-cover flex-shrink-0 border border-white/20"
+                    />
+                  )}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

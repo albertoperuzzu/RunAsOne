@@ -247,6 +247,43 @@ def get_team_stats(
     return TeamStatsResponse(**result)
 
 
+@router.get("/calendar")
+def get_calendar_events(
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Restituisce tutti gli eventi futuri nei team dell'utente, con info team."""
+    user = db.exec(select(User).where(User.id == current_user.id)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    now = datetime.now()
+    result = []
+    for team in user.teams:
+        events = db.exec(
+            select(TeamEvent).where(TeamEvent.team_id == team.id)
+        ).all()
+        for e in events:
+            if datetime.combine(e.date, e.hour) >= now:
+                result.append({
+                    "id": e.id,
+                    "team_id": team.id,
+                    "team_name": team.name,
+                    "name": e.name,
+                    "date": str(e.date),
+                    "hour": str(e.hour),
+                    "description": e.description,
+                    "start_place": e.start_place,
+                    "end_place": e.end_place,
+                    "event_type": e.event_type,
+                    "distance_km": e.distance_km,
+                    "event_img_url": e.event_img_url,
+                })
+
+    result.sort(key=lambda x: (x["date"], x["hour"]))
+    return result
+
+
 @router.get("/getUserInfo")
 def get_my_teams(
     db: Session = Depends(get_session),
@@ -330,7 +367,7 @@ async def create_event(
         user_id=current_user.id,
         title=f"🗓️ {name}",
         description=description,
-        photo_url=team.image_url,
+        photo_url=img_url if img_url else team.image_url,
         event_id=new_event.id,
     )
     session.add(auto_post)
