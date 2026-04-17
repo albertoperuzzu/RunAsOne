@@ -55,7 +55,7 @@ export default function NotificationsPage() {
     <div className="min-h-screen text-white">
       <Navbar />
       <div className="max-w-lg mx-auto px-4 pt-20 pb-24">
-        <h1 className="text-xl font-bold text-white mb-5">Notifiche</h1>
+        <h1 className="text-xl font-bold text-indaco mb-5">Notifiche</h1>
 
         {loading ? (
           <p className="text-white/50 text-sm text-center mt-10">Caricamento...</p>

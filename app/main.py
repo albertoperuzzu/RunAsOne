@@ -18,13 +18,49 @@ from app.db_search import UPLOAD_DIR
 from sqlalchemy.orm import Session
 from jose import jwt
 import os
+import atexit
 from app.auth_helpers import create_access_token, create_refresh_token, verify_token, is_refresh_token, REFRESH_TOKEN_EXPIRE_DAYS
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 import logging
 
 app = FastAPI(debug=True)
 create_db_and_tables()
 migrate_db()
 os.makedirs("uploads", exist_ok=True)
+
+
+def _check_concluded_events():
+    """Midnight job: logga gli eventi conclusi nelle ultime 24 ore."""
+    from datetime import timedelta
+    from sqlmodel import Session
+    from app.models import TeamEvent
+    from app.database import engine
+
+    with Session(engine) as session:
+        from sqlmodel import select as _select
+        all_events = session.exec(_select(TeamEvent)).all()
+        from datetime import datetime as _dt
+        now = _dt.now()
+        yesterday = now - timedelta(hours=24)
+        just_concluded = [
+            e for e in all_events
+            if yesterday <= _dt.combine(e.date, e.hour) < now
+        ]
+        if just_concluded:
+            logging.info(
+                "[scheduler] %d evento/i concluso/i nelle ultime 24h: %s",
+                len(just_concluded),
+                ", ".join(f"#{e.id} '{e.name}'" for e in just_concluded),
+            )
+        else:
+            logging.info("[scheduler] Nessun evento concluso nelle ultime 24h.")
+
+
+_scheduler = BackgroundScheduler(timezone="Europe/Rome")
+_scheduler.add_job(_check_concluded_events, CronTrigger(hour=0, minute=0, timezone="Europe/Rome"))
+_scheduler.start()
+atexit.register(lambda: _scheduler.shutdown(wait=False))
 
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 

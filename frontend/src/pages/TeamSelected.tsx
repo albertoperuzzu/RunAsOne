@@ -941,7 +941,7 @@ export default function TeamSelected() {
             {/* Sezione eventi conclusi */}
             {pastEvents.length > 0 && (
               <div className="mt-8">
-                <h3 className="text-white/40 text-sm font-semibold mb-3 text-center uppercase tracking-widest">
+                <h3 className="text-gray-500 text-sm font-semibold mb-3 text-center uppercase tracking-widest">
                   Eventi conclusi
                 </h3>
                 <ul className="space-y-3">

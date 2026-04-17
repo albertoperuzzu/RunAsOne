@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, Form
 from fastapi.responses import JSONResponse
 from app.database import get_session
 from typing import List, Optional
-from app.models import User, Team, UserTeamLink, Activity, TeamEvent, TeamPost, EventPhoto, PostPhoto, Notification
+from app.models import User, Team, UserTeamLink, Activity, TeamEvent, TeamPost, EventPhoto, PostPhoto, Notification, UserPath
 from app.custom_beans import TeamStatsResponse
 from app.cloudinary_utils import is_production, upload_media
 from sqlmodel import Session, select
@@ -255,12 +255,13 @@ def get_my_teams(
     user = db.exec(select(User).where(User.id == current_user.id)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    paths_count = len(db.exec(select(UserPath).where(UserPath.user_id == user.id)).all())
     result = {
         "id": user.id,
         "name": user.name,
         "email": user.email,
         "profile_img_url": user.profile_img_url,
-        "activities_count": len(user.activities),
+        "paths_count": paths_count,
         "teams_count": len(user.teams)
     }
     return result
@@ -370,8 +371,8 @@ def list_team_events(team_id: int, session: Session = Depends(get_session)):
     events = session.exec(
         select(TeamEvent).where(TeamEvent.team_id == team_id)
     ).all()
-    cutoff = datetime.now() - timedelta(hours=24)
-    return [_event_to_dict(e, session) for e in events if datetime.combine(e.date, e.hour) >= cutoff]
+    now = datetime.now()
+    return [_event_to_dict(e, session) for e in events if datetime.combine(e.date, e.hour) >= now]
 
 
 @router.get("/teams/{team_id}/past_events")
@@ -379,8 +380,8 @@ def list_past_events(team_id: int, session: Session = Depends(get_session)):
     events = session.exec(
         select(TeamEvent).where(TeamEvent.team_id == team_id)
     ).all()
-    cutoff = datetime.now() - timedelta(hours=24)
-    return [_event_to_dict(e, session) for e in events if datetime.combine(e.date, e.hour) < cutoff]
+    now = datetime.now()
+    return [_event_to_dict(e, session) for e in events if datetime.combine(e.date, e.hour) < now]
 
 
 @router.put("/teams/{team_id}/events/{event_id}", response_model=TeamEvent)

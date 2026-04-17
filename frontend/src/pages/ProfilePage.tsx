@@ -10,7 +10,7 @@ type User = {
   name: string;
   email: string;
   profile_img_url: string;
-  activities_count: number;
+  paths_count: number;
   teams_count: number;
 };
 
@@ -32,7 +32,7 @@ export default function ProfilePage() {
     <div className="min-h-screen pb-8">
       <Navbar />
       <div className="px-4 pt-8 max-w-sm mx-auto">
-        <h1 className="text-white text-2xl font-bold drop-shadow mb-6 text-center">
+        <h1 className="text-indaco text-2xl font-bold drop-shadow mb-6 text-center">
           Il tuo profilo
         </h1>
 
@@ -88,8 +88,8 @@ export default function ProfilePage() {
             {/* Stats */}
             <div className="grid grid-cols-2 text-center">
               <div>
-                <div className="text-white/50 text-xs">Attività</div>
-                <div className="text-white font-bold text-lg">{user.activities_count}</div>
+                <div className="text-white/50 text-xs">Percorsi</div>
+                <div className="text-white font-bold text-lg">{user.paths_count}</div>
               </div>
               <div>
                 <div className="text-white/50 text-xs">Team</div>
